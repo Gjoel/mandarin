@@ -241,6 +241,13 @@ body.shiftpy .py{display:none}
 .typeans{display:flex;gap:8px;align-items:center}
 .typeans input{flex:1;min-width:0;font-family:var(--f-sc);font-size:18px;padding:9px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
 .typeans-lbl{font-size:12px;color:var(--muted);text-align:center;margin:2px 0 -4px}
+
+/* Word colours: each word's characters and pinyin share one colour */
+:root{--w0:#2459BE;--w1:#B0620A;--w2:#13715A;--w3:#B3352B;--w4:#7A3FC2}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--w0:#79A6FF;--w1:#F2B33D;--w2:#52C4A0;--w3:#FF7A66;--w4:#C39BFF}}
+:root[data-theme="dark"]{--w0:#79A6FF;--w1:#F2B33D;--w2:#52C4A0;--w3:#FF7A66;--w4:#C39BFF}
+.wc0{color:var(--w0)}.wc1{color:var(--w1)}.wc2{color:var(--w2)}.wc3{color:var(--w3)}.wc4{color:var(--w4)}
+.py .pw + .pw{margin-left:.5em}
 </style>
 </head>
 <body>
@@ -655,7 +662,66 @@ const TONE = {};
 "ǎěǐǒǔǚǍĚǏǑǓ".split("").forEach(c => TONE[c] = 3);
 "àèìòùǜÀÈÌÒÙ".split("").forEach(c => TONE[c] = 4);
 function toneOf(s) { for (const c of s) if (TONE[c]) return TONE[c]; return 5; }
-function pyHtml(py) { return String(py || "").split(" ").map(s => `<span class="t${toneOf(s)}">${esc(s)}</span>`).join(" "); }
+function pyTone(py) { return String(py || "").split(" ").map(s => `<span class="t${toneOf(s)}">${esc(s)}</span>`).join(" "); }
+/* Word colouring. A sentence is split into words (using the spaces in lesson data when present,
+   otherwise the dictionary), each word gets one colour, and its characters and pinyin share it. */
+const HAN_CH = /[㐀-䶿一-鿿豈-﫿]/;
+const WPLAN = new Map();
+function segWords(zh) {
+  const d = typeof HOV !== "undefined" && HOV.dict; if (!d) return null;
+  const out = [];
+  for (const part of String(zh).match(/[㐀-䶿一-鿿豈-﫿]+|[^㐀-䶿一-鿿豈-﫿]+/g) || []) {
+    if (!HAN_CH.test(part)) { out.push(part); continue; }
+    const ch = Array.from(part), fw = [], bw = [];
+    for (let k = 0; k < ch.length;) { let n = Math.min(4, ch.length - k); while (n > 1 && !d.has(ch.slice(k, k + n).join(""))) n--; fw.push(ch.slice(k, k + n).join("")); k += n; }
+    for (let k = ch.length; k > 0;) { let n = Math.min(4, k); while (n > 1 && !d.has(ch.slice(k - n, k).join(""))) n--; bw.unshift(ch.slice(k - n, k).join("")); k -= n; }
+    const singles = a => a.filter(w => w.length === 1).length;
+    const pick = fw.length < bw.length ? fw : bw.length < fw.length ? bw : (singles(fw) < singles(bw) ? fw : bw);
+    out.push(...pick);
+  }
+  return out;
+}
+function wordPlan(zh, py) {
+  if (P.settings.pyColor === "tone" || !zh || !py) return null;
+  const key = zh + "\u0001" + py;
+  if (WPLAN.has(key)) return WPLAN.get(key);
+  const words = /\s/.test(zh.trim()) ? zh.trim().split(/\s+/) : segWords(zh);
+  if (!words) return null; /* dictionary not loaded yet: try again later */
+  const syl = String(py).trim().split(/\s+/).filter(t => /[a-zA-ZÀ-ɏ]/.test(t));
+  const plan = []; let si = 0, wi = 0, hi = 0, ok = true;
+  const hanTotal = Array.from(zh).filter(c => HAN_CH.test(c)).length;
+  for (const w of words) {
+    const chars = Array.from(w), han = chars.some(c => HAN_CH.test(c));
+    if (!han) { plan.push({ t: w, han: false, syl: [] }); continue; }
+    const mine = [];
+    for (const c of chars) {
+      if (!HAN_CH.test(c)) continue;
+      const left = hanTotal - hi++;
+      /* 儿 is often written into the previous syllable (diǎnr) */
+      if (c === "儿" && si > 0 && /r[^a-z]*$/i.test(syl[si - 1]) && syl.length - si < left) continue;
+      if (si >= syl.length) { ok = false; break; }
+      mine.push(syl[si++]);
+    }
+    if (!ok) break;
+    plan.push({ t: w, han: true, syl: mine, c: wi++ % 5 });
+  }
+  const res = ok && si === syl.length ? plan : false;
+  WPLAN.set(key, res);
+  return res;
+}
+/* pinyin line; pass the characters as the 2nd argument to colour by word */
+function pyHtml(py, zh) {
+  const plan = zh ? wordPlan(zh, py) : null;
+  if (!plan) return pyTone(py);
+  return plan.filter(w => w.han && w.syl.length).map(w => `<span class="pw wc${w.c}">${esc(w.syl.join(" "))}</span>`).join("");
+}
+/* characters, coloured by word to match pinyin (zh may contain spaces between words) */
+function hzHtml(zh, py) {
+  const plain = String(zh || "").replace(/\s+/g, "");
+  const plan = wordPlan(zh, py);
+  if (!plan) return esc(plain);
+  return plan.map(w => w.han ? `<span class="wc${w.c}">${esc(w.t)}</span>` : esc(w.t)).join("");
+}
 
 const ICON = {
   play: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>',
@@ -700,7 +766,7 @@ function numZh(n) {
 
 /* ===================== PROGRESS STORE ===================== */
 const LS_KEY = "xiaolaoshi.v1";
-const DEFAULT = () => ({ v: 1, items: {}, days: {}, area: {}, customs: [], settings: { rate: 0.9, voice: "", pinyin: true, menuPy: false, menuEn: false } });
+const DEFAULT = () => ({ v: 1, items: {}, days: {}, area: {}, customs: [], settings: { rate: 0.9, voice: "", pinyin: true, menuPy: false, menuEn: false, pyColor: "word" } });
 function normalise(o) { const b = DEFAULT(); o = o || {}; return { ...b, ...o, settings: { ...b.settings, ...(o.settings || {}) }, items: o.items || {}, days: o.days || {}, area: o.area || {}, customs: o.customs || [] }; }
 let P = DEFAULT();
 try { const s = localStorage.getItem(LS_KEY); if (s) P = normalise(JSON.parse(s)); } catch (e) { }
@@ -920,14 +986,14 @@ function qLM(i) {
   const s = LISTEN[i]; if (!s) return null;
   const zh = joinZh(s[0]);
   const others = similarPick(LISTEN, i, x => x[0].split(" "), 3).map(x => x[2]);
-  return { key: "LM:" + i, kind: "choice", label: "Listen, then choose the meaning", audio: zh, auto: true, ...mkChoice(s[2], others), reveal: { zh, py: s[1], en: s[2] } };
+  return { key: "LM:" + i, kind: "choice", label: "Listen, then choose the meaning", audio: zh, auto: true, ...mkChoice(s[2], others), reveal: { zh, seg: s[0], py: s[1], en: s[2] } };
 }
 function qLB(i) {
   const s = LISTEN[i]; if (!s) return null;
   const toks = s[0].split(" ").filter(t => !isPunct(t));
   const pool = [...new Set(LISTEN.flatMap((x, j) => j === i ? [] : x[0].split(" ")).filter(t => !isPunct(t) && !toks.includes(t)))];
   let tiles = shuffle([...toks, ...pick(pool, toks.length > 6 ? 2 : 1)]);
-  return { key: "LB:" + i, kind: "order", label: "Build the sentence you hear", audio: joinZh(s[0]), auto: true, tiles, answers: [toks], hint: s[2], reveal: { zh: joinZh(s[0]), py: s[1], en: s[2] } };
+  return { key: "LB:" + i, kind: "order", label: "Build the sentence you hear", audio: joinZh(s[0]), auto: true, tiles, answers: [toks], hint: s[2], reveal: { zh: joinZh(s[0]), seg: s[0], py: s[1], en: s[2] } };
 }
 function toneLabel(arr) { return arr.map(t => `<span class="t${t}">${t === 5 ? "·" : t}</span>`).join(" + "); }
 function qTN(i) {
@@ -1091,8 +1157,8 @@ function checkOrder() {
 function revealBlock(q) {
   const r = q.reveal || {};
   let h = `<div class="reveal stack" style="gap:4px">`;
-  if (r.zh) h += `<div class="row"><span class="hz">${esc(r.zh)}</span>${spk(r.zh)}<button class="iconbtn" data-act="slow" data-t="${esc(r.zh)}" aria-label="Play slowly">${ICON.slow}</button></div>`;
-  if (r.py) h += `<div class="py">${pyHtml(r.py)}</div>`;
+  if (r.zh) h += `<div class="row"><span class="hz">${hzHtml(r.seg || r.zh, r.py)}</span>${spk(r.zh)}<button class="iconbtn" data-act="slow" data-t="${esc(r.zh)}" aria-label="Play slowly">${ICON.slow}</button></div>`;
+  if (r.py) h += `<div class="py">${pyHtml(r.py, r.seg || r.zh)}</div>`;
   if (r.en) h += `<div>${esc(r.en)}</div>`;
   h += `</div>`;
   if (q.dish) h += `<div class="break">${segment(q.dish.zh).map(([t, w]) => `<span><b class="hz">${esc(t)}</b> ${w ? `<span class="py">${pyHtml(w[1])}</span> ${esc(w[2])}` : ""}</span>`).join("")}</div>`;
@@ -1105,7 +1171,7 @@ function viewQuiz() {
   h += `<div class="card prompt"><div class="label">${esc(q.label)}</div>`;
   if (q.audio) {
     h += `<div class="playrow"><button class="iconbtn lg" data-act="replay" aria-label="Play">${ICON.play}</button><button class="iconbtn" data-act="replay-slow" aria-label="Play slowly">${ICON.slow}</button></div>`;
-    if (q.hideText && !S.answered) h += S.showText ? `<div class="hzmed">${esc(q.reveal.zh)}</div><div class="py">${pyHtml(q.reveal.py)}</div>` : `<button class="btn sm ghost" data-act="showtext">Show the text</button>`;
+    if (q.hideText && !S.answered) h += S.showText ? `<div class="hzmed">${hzHtml(q.reveal.seg || q.reveal.zh, q.reveal.py)}</div><div class="py">${pyHtml(q.reveal.py, q.reveal.seg || q.reveal.zh)}</div>` : `<button class="btn sm ghost" data-act="showtext">Show the text</button>`;
   }
   if (q.show) h += q.plainShow ? `<div style="font-weight:600">${esc(q.show)}</div>` : `<div class="${q.big ? "hzbig" : "hzmed"}">${esc(q.show)}</div>`;
   if (q.en) h += `<div style="font-size:17px;font-weight:600">${esc(q.en)}</div>`;
@@ -1202,19 +1268,19 @@ function vMenu() {
 function vMenuRead() {
   const st = P.settings;
   let h = `<div class="row"><label class="sw"><input type="checkbox" id="menuPy" data-set="menuPy" ${st.menuPy ? "checked" : ""}> Pinyin</label><label class="sw"><input type="checkbox" id="menuEn" data-set="menuEn" ${st.menuEn ? "checked" : ""}> English</label><span class="muted" style="font-size:13px">Tap a dish for the breakdown and how to order it.</span></div>`;
-  h += `<div class="menu-sheet"><div class="menu-head"><span class="hz">${RESTAURANT.zh}</span><span class="py muted">${pyHtml(RESTAURANT.py)}</span><span class="muted" style="font-size:12px">${esc(RESTAURANT.en)} · 辣 = spicy</span></div>`;
+  h += `<div class="menu-sheet"><div class="menu-head"><span class="hz">${hzHtml(RESTAURANT.zh, RESTAURANT.py)}</span><span class="py muted">${pyHtml(RESTAURANT.py, RESTAURANT.zh)}</span><span class="muted" style="font-size:12px">${esc(RESTAURANT.en)} · 辣 = spicy</span></div>`;
   let gi = 0;
   MENU.forEach(sec => {
     h += `<div class="msec"><div class="msec-h"><span class="hz">${sec.sec}</span>${st.menuEn ? `<span class="muted" style="font-size:12px">${esc(sec.secEn)}</span>` : ""}</div>`;
     sec.items.forEach(d => {
       const idx = gi++; const open = state.openDish === idx;
-      h += `<button class="dish" data-act="dish" data-i="${idx}" aria-expanded="${open}"><div class="dish-line"><span class="hz">${esc(d.zh)}</span>${d.tag ? `<span class="stamp">${d.tag}</span>` : ""}${d.spicy ? `<span class="chili" title="spicy level ${d.spicy}">${"辣".repeat(d.spicy)}</span>` : ""}<span class="lead"></span><span class="price">¥${d.p}<small>/${d.u}</small></span></div>${st.menuPy || st.menuEn ? `<div class="dish-sub">${st.menuPy ? `<span class="py">${pyHtml(d.py)}</span> ` : ""}${st.menuEn ? `<span class="muted">${esc(d.en)}</span>` : ""}</div>` : ""}</button>`;
+      h += `<button class="dish" data-act="dish" data-i="${idx}" aria-expanded="${open}"><div class="dish-line"><span class="hz">${st.menuPy ? hzHtml(d.zh, d.py) : esc(d.zh)}</span>${d.tag ? `<span class="stamp">${d.tag}</span>` : ""}${d.spicy ? `<span class="chili" title="spicy level ${d.spicy}">${"辣".repeat(d.spicy)}</span>` : ""}<span class="lead"></span><span class="price">¥${d.p}<small>/${d.u}</small></span></div>${st.menuPy || st.menuEn ? `<div class="dish-sub">${st.menuPy ? `<span class="py">${pyHtml(d.py, d.zh)}</span> ` : ""}${st.menuEn ? `<span class="muted">${esc(d.en)}</span>` : ""}</div>` : ""}</button>`;
       if (open) {
         const op = orderPhrase(d);
-        h += `<div class="dish-detail"><div class="row"><span class="hz" style="font-size:24px">${esc(d.zh)}</span>${spk(d.zh)}<button class="iconbtn" data-act="slow" data-t="${esc(d.zh)}" aria-label="Play slowly">${ICON.slow}</button></div><div class="py">${pyHtml(d.py)}</div><div><b>${esc(d.en)}</b></div>`;
+        h += `<div class="dish-detail"><div class="row"><span class="hz" style="font-size:24px">${hzHtml(d.zh, d.py)}</span>${spk(d.zh)}<button class="iconbtn" data-act="slow" data-t="${esc(d.zh)}" aria-label="Play slowly">${ICON.slow}</button></div><div class="py">${pyHtml(d.py, d.zh)}</div><div><b>${esc(d.en)}</b></div>`;
         h += `<div class="break">${segment(d.zh).map(([t, w]) => `<span><b class="hz">${esc(t)}</b> ${w ? `<span class="py">${pyHtml(w[1])}</span> ${esc(w[2])}` : ""}</span>`).join("")}</div>`;
         if (d.note) h += `<div class="note">${esc(d.note)}</div>`;
-        h += `<div class="eyebrow" style="margin-top:4px">How to order it</div><div class="row"><span class="hz" style="font-size:19px">${esc(op.zh)}</span>${spk(op.zh)}</div><div class="py">${pyHtml(op.py)}</div><div class="muted" style="font-size:13px">${esc(d.u)} ${UNITS[d.u] ? "(" + UNITS[d.u][0] + ") = " + UNITS[d.u][2] : ""}. 来 lái is the everyday way to say "bring me".</div></div>`;
+        h += `<div class="eyebrow" style="margin-top:4px">How to order it</div><div class="row"><span class="hz" style="font-size:19px">${hzHtml(op.zh, op.py)}</span>${spk(op.zh)}</div><div class="py">${pyHtml(op.py, op.zh)}</div><div class="muted" style="font-size:13px">${esc(d.u)} ${UNITS[d.u] ? "(" + UNITS[d.u][0] + ") = " + UNITS[d.u][2] : ""}. 来 lái is the everyday way to say "bring me".</div></div>`;
       }
     });
     h += `</div>`;
@@ -1232,7 +1298,7 @@ function vMenuDrill() {
   return h + `</div>`;
 }
 function vPhrases() {
-  return PHRASES.map(g => `<div class="card"><h3>${esc(g.g)}</h3>${g.list.map(p => `<div class="phr">${spk(p[0])}<div class="tx"><div class="hz">${esc(p[0])}</div><div class="py" style="font-size:13px">${pyHtml(p[1])}</div><div class="muted" style="font-size:13px">${esc(p[2])}</div></div></div>`).join("")}</div>`).join("");
+  return PHRASES.map(g => `<div class="card"><h3>${esc(g.g)}</h3>${g.list.map(p => `<div class="phr">${spk(p[0])}<div class="tx"><div class="hz">${hzHtml(p[0], p[1])}</div><div class="py" style="font-size:13px">${pyHtml(p[1], p[0])}</div><div class="muted" style="font-size:13px">${esc(p[2])}</div></div></div>`).join("")}</div>`).join("");
 }
 function vScan() {
   const sc = state.scan;
@@ -1243,7 +1309,7 @@ function vScan() {
   if (sc.items.length) {
     h += `<div class="card">` + sc.items.map((it, i) => {
       const saved = P.customs.some(c => c.zh === it.zh);
-      return `<div class="scan-card"><div class="row"><span class="hz">${esc(it.zh)}</span>${spk(it.zh)}${+it.spicy ? `<span class="chili">${"辣".repeat(Math.min(3, +it.spicy))}</span>` : ""}${it.price ? `<span class="price" style="margin-left:auto">${esc(it.price)}</span>` : ""}</div><div class="py">${pyHtml(it.py)}</div><div><b>${esc(it.en)}</b> <span class="muted">${esc(it.what || "")}</span></div>${it.order ? `<div class="row" style="font-size:14px"><span class="muted">Order:</span><span class="hz" style="font-size:16px">${esc(it.order)}</span>${spk(it.order)}<span class="py muted" style="font-size:12px">${pyHtml(it.order_py || "")}</span></div>` : ""}<div><button class="btn sm" data-act="savedish" data-i="${i}" ${saved ? "disabled" : ""}>${saved ? "In your review deck" : "Add to review"}</button></div></div>`;
+      return `<div class="scan-card"><div class="row"><span class="hz">${hzHtml(it.zh, it.py)}</span>${spk(it.zh)}${+it.spicy ? `<span class="chili">${"辣".repeat(Math.min(3, +it.spicy))}</span>` : ""}${it.price ? `<span class="price" style="margin-left:auto">${esc(it.price)}</span>` : ""}</div><div class="py">${pyHtml(it.py, it.zh)}</div><div><b>${esc(it.en)}</b> <span class="muted">${esc(it.what || "")}</span></div>${it.order ? `<div class="row" style="font-size:14px"><span class="muted">Order:</span><span class="hz" style="font-size:16px">${esc(it.order)}</span>${spk(it.order)}<span class="py muted" style="font-size:12px">${pyHtml(it.order_py || "")}</span></div>` : ""}<div><button class="btn sm" data-act="savedish" data-i="${i}" ${saved ? "disabled" : ""}>${saved ? "In your review deck" : "Add to review"}</button></div></div>`;
     }).join("") + `</div>`;
   }
   return h;
@@ -1285,9 +1351,9 @@ function vWaiter() {
   c.msgs.forEach((m, i) => {
     if (m.who === "w") {
       const hide = c.listen && !c.shown[i];
-      h += `<div class="msg w"><div class="row" style="gap:6px">${spk(m.zh)}<button class="iconbtn" data-act="slow" data-t="${esc(m.zh)}" aria-label="Play slowly">${ICON.slow}</button></div><div class="${hide ? "hidden-text" : ""}" data-act="chatshow" data-i="${i}"><div class="hz">${esc(m.zh)}</div><div class="py" style="font-size:13px">${pyHtml(m.py)}</div><div class="muted" style="font-size:13px">${esc(m.en)}</div></div></div>`;
+      h += `<div class="msg w"><div class="row" style="gap:6px">${spk(m.zh)}<button class="iconbtn" data-act="slow" data-t="${esc(m.zh)}" aria-label="Play slowly">${ICON.slow}</button></div><div class="${hide ? "hidden-text" : ""}" data-act="chatshow" data-i="${i}"><div class="hz">${hzHtml(m.zh, m.py)}</div><div class="py" style="font-size:13px">${pyHtml(m.py, m.zh)}</div><div class="muted" style="font-size:13px">${esc(m.en)}</div></div></div>`;
     } else {
-      h += `<div class="msg me"><div class="sc">${esc(m.text)}</div>${m.fix ? `<div class="fix"><div class="row" style="gap:6px"><span class="hz" style="font-size:16px">${esc(m.fix.better)}</span>${spk(m.fix.better)}</div><div class="py" style="font-size:12px">${pyHtml(m.fix.better_py || "")}</div><div class="muted">${esc(m.fix.why || "")}</div></div>` : ""}</div>`;
+      h += `<div class="msg me"><div class="sc">${esc(m.text)}</div>${m.fix ? `<div class="fix"><div class="row" style="gap:6px"><span class="hz" style="font-size:16px">${hzHtml(m.fix.better, m.fix.better_py || "")}</span>${spk(m.fix.better)}</div><div class="py" style="font-size:12px">${pyHtml(m.fix.better_py || "", m.fix.better)}</div><div class="muted">${esc(m.fix.why || "")}</div></div>` : ""}</div>`;
     }
   });
   if (c.busy) h += `<div class="msg w pulse"><span class="muted">服务员正在想… (thinking)</span></div>`;
@@ -1326,7 +1392,7 @@ function vListen() {
   h += modeCard("round", "服", "What did the waiter say?", "Restaurant lines, text hidden", ["OR"], 'data-p="OR" data-title="Waiter listening"');
   h += `</div>`;
   h += `<div class="card stack"><div class="row" style="justify-content:space-between"><div><h3>Sentence library</h3><div class="muted" style="font-size:13px">Play, guess, then tap to check. Good for shadowing: repeat each line out loud.</div></div><button class="btn sm" data-act="lib">${state.libOpen ? "Hide" : "Open"}</button></div>`;
-  if (state.libOpen) h += LISTEN.map((s, i) => { const zh = joinZh(s[0]); const sh = state.libShown[i]; return `<div class="phr">${spk(zh)}<button class="iconbtn" data-act="slow" data-t="${esc(zh)}" aria-label="Play slowly">${ICON.slow}</button><div class="tx ${sh ? "" : "hidden-text"}" data-act="libshow" data-i="${i}"><div class="hz">${esc(zh)}</div><div class="py" style="font-size:13px">${pyHtml(s[1])}</div><div class="muted" style="font-size:13px">${esc(s[2])}</div></div></div>`; }).join("");
+  if (state.libOpen) h += LISTEN.map((s, i) => { const zh = joinZh(s[0]); const sh = state.libShown[i]; return `<div class="phr">${spk(zh)}<button class="iconbtn" data-act="slow" data-t="${esc(zh)}" aria-label="Play slowly">${ICON.slow}</button><div class="tx ${sh ? "" : "hidden-text"}" data-act="libshow" data-i="${i}"><div class="hz">${hzHtml(s[0], s[1])}</div><div class="py" style="font-size:13px">${pyHtml(s[1], s[0])}</div><div class="muted" style="font-size:13px">${esc(s[2])}</div></div></div>`; }).join("");
   return h + `</div></section>`;
 }
 
@@ -1343,7 +1409,7 @@ function vPattern(g) {
   const gc = state.gcheck;
   let h = `<section class="stack"><div class="row"><button class="iconbtn" data-act="gback" aria-label="Back to patterns">${ICON.back}</button><span class="eyebrow">HSK ${g.hsk} pattern</span></div>`;
   h += `<div class="card stack"><div class="row"><span class="hz" style="font-size:34px;color:var(--jade)">${esc(g.zh)}</span><h2>${esc(g.name)}</h2></div><div class="structure">${esc(g.s)}</div><p style="margin:0">${esc(g.x)}</p></div>`;
-  h += `<div class="card"><h3>Examples</h3>${g.ex.map(e => { const zh = joinZh(e[0]); return `<div class="ex">${spk(zh)}<div class="tx"><div class="hz">${esc(zh)}</div><div class="py" style="font-size:13px">${pyHtml(e[1])}</div><div class="muted" style="font-size:13px">${esc(e[2])}</div></div></div>`; }).join("")}</div>`;
+  h += `<div class="card"><h3>Examples</h3>${g.ex.map(e => { const zh = joinZh(e[0]); return `<div class="ex">${spk(zh)}<div class="tx"><div class="hz">${hzHtml(e[0], e[1])}</div><div class="py" style="font-size:13px">${pyHtml(e[1], e[0])}</div><div class="muted" style="font-size:13px">${esc(e[2])}</div></div></div>`; }).join("")}</div>`;
   h += `<button class="btn primary block" data-act="gdrill" data-id="${g.id}">Drill this pattern (${g.d.length} questions)</button>`;
   if (SAMPLE) h += `<div class="card stack"><h3>Write your own sentence</h3><div class="muted" style="font-size:14px">Use ${esc(g.zh)} in a sentence about your life. Claude checks it and suggests a better version.</div><textarea id="gtext" placeholder="Write in characters or pinyin">${esc(gc.text || "")}</textarea><button class="btn" data-act="gcheck" data-id="${g.id}" ${gc.busy ? "disabled" : ""}>${gc.busy ? "Checking…" : "Check my sentence"}</button>${gc.err ? `<div class="warn">${esc(gc.err)}</div>` : ""}${gc.out ? `<div class="note out" id="gout">${esc(gc.out)}</div>` : ""}</div>`;
   return h + `</section>`;
@@ -1380,7 +1446,7 @@ function vMe() {
   else h += voiceWarning();
   h += `<label class="stack" style="gap:4px"><span class="muted" style="font-size:13px">Speed: <b id="ratev">${P.settings.rate.toFixed(2)}×</b></span><input type="range" id="rate" min="0.5" max="1.2" step="0.05" value="${P.settings.rate}" data-set="rate"></label>`;
   h += `<div class="row"><button class="btn sm" data-act="say" data-t="你好，我是你的中文老师。我们开始吧！">Test the voice</button></div>`;
-  h += `<label class="sw"><input type="checkbox" id="pinyin" data-set="pinyin" ${P.settings.pinyin ? "checked" : ""}> Show pinyin on answer options before I answer</label><div class="muted shiftpy-tip">On a computer, hold <kbd>Shift</kbd> to see pinyin over every character on the screen, and hover any character for its meaning (dictionary: CC-CEDICT).</div></div>`;
+  h += `<label class="sw"><input type="checkbox" id="pinyin" data-set="pinyin" ${P.settings.pinyin ? "checked" : ""}> Show pinyin on answer options before I answer</label><label class="stack" style="gap:4px"><span class="muted" style="font-size:13px">Colour pinyin by</span><select id="pycolor" data-set="pyColor"><option value="word" ${P.settings.pyColor !== "tone" ? "selected" : ""}>Word (characters and pinyin match)</option><option value="tone" ${P.settings.pyColor === "tone" ? "selected" : ""}>Tone (1 red, 2 amber, 3 green, 4 blue)</option></select></label><div class="muted shiftpy-tip">On a computer, hold <kbd>Shift</kbd> to see pinyin over every character on the screen, and hover any character for its meaning (dictionary: CC-CEDICT).</div></div>`;
   if (STANDALONE) h += `<div class="card stack"><h3>Claude features</h3><div class="muted" style="font-size:14px">Menu scanning, the waiter chat and sentence checking need an Anthropic API key (from console.anthropic.com). It's stored only in this browser and sent only to Anthropic. Usage is billed to your API account.</div><input type="text" id="apikey" placeholder="sk-ant-…" value="${esc(API.key ? API.key.slice(0, 10) + "…" + API.key.slice(-4) : "")}" autocomplete="off"><input type="text" id="apimodel" value="${esc(API.model)}" aria-label="Model name"><div class="row"><button class="btn sm primary" data-act="apisave">Save</button>${API.key ? `<button class="btn sm ghost" data-act="apiclear">Remove key</button><span class="muted" style="font-size:13px">Key saved</span>` : ""}</div></div>`;
   h += `<div class="card stack"><h3>Your data</h3><div class="muted" style="font-size:14px">${store.mode === "cloud" ? "Progress is saved to your Claude account, so it follows you between your phone and computer." : (STANDALONE ? "Progress is saved in this browser only. Clearing browser data erases it, and it won't sync to other devices." : "Progress is saved in this browser only. Open the page signed in to the Claude app to save it to your account.")}</div>`;
   h += state.resetArm ? `<div class="row"><span>Erase all progress?</span><button class="btn sm" data-act="resetyes" style="border-color:var(--bad);color:var(--bad)">Yes, erase</button><button class="btn sm" data-act="resetno">Keep it</button></div>` : `<div><button class="btn sm ghost" data-act="reset">Reset progress</button></div>`;
@@ -1450,6 +1516,7 @@ document.addEventListener("change", e => {
   if (t.dataset.set) {
     const k = t.dataset.set;
     P.settings[k] = t.type === "checkbox" ? t.checked : k === "rate" ? +t.value : t.value;
+    if (k === "pyColor") WPLAN.clear();
     save(); render(); if (k === "voice") speak("你好");
   }
   if (t.dataset.actChange === "scanfile") { state.scan.file = t.files && t.files[0] || null; state.scan.text = ($("#scantext") || {}).value || ""; render(); }
@@ -1525,7 +1592,7 @@ function spyAnnotate(root) {
         const rt = document.createElement("rt");
         const py = pys.length === chars.length ? pys[k] : "";
         rt.textContent = py;
-        rt.className = "t" + toneOf(py);
+        rt.className = P.settings.pyColor === "tone" ? "t" + toneOf(py) : "";
         r.appendChild(rt);
         frag.appendChild(r);
       });
@@ -1718,8 +1785,12 @@ if (CAN_HOVER) {
   document.addEventListener("mousedown", hovClear);
   document.addEventListener("keydown", e => { if (e.key === "Shift") setTimeout(() => { hovClear(); hovTick(); }, 30); });
   document.addEventListener("keyup", e => { if (e.key === "Shift") setTimeout(() => { hovClear(); hovTick(); }, 30); });
-  setTimeout(loadDict, 2500);
 }
+loadDict().then(d => {
+  if (!d) return; WPLAN.clear();
+  const a = document.activeElement, tag = a && (a.tagName || "").toLowerCase();
+  if (tag !== "input" && tag !== "textarea" && tag !== "select" && !(typeof DRG !== "undefined" && DRG.on)) render();
+});
 
 /* ===================== TYPED ANSWERS ===================== */
 /* Word-order and Chinese multiple-choice questions accept a typed answer,
