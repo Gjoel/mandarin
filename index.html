@@ -944,6 +944,59 @@ function qOR(s, j) {
     opts: all.map(x => ({ zh: x.o[0], py: x.o[1] })), answer: all.findIndex(x => x.ok), whys: all.map(x => x.o[3]), optEn: all.map(x => x.o[2]),
     reveal: { zh: st.w, py: st.py, en: st.en } };
 }
+/* English for grammar fill-in sentences, shown after answering */
+const FILL_EN = {
+"我昨天没去超市。": "I didn't go to the supermarket yesterday.",
+"我们吃了饭就去看电影。": "We'll go to the movies as soon as we've eaten.",
+"我吃饱了，不要了。": "I'm full, I don't want any more.",
+"我以前喝酒，现在不喝了。": "I used to drink, but I don't any more.",
+"我没去过上海。": "I've never been to Shanghai.",
+"你吃过北京烤鸭吗？": "Have you ever had Peking duck?",
+"茶比咖啡便宜一点儿。": "Tea is a bit cheaper than coffee.",
+"北京比悉尼冷多了。": "Beijing is much colder than Sydney.",
+"我的中文没有你的好。": "My Chinese isn't as good as yours.",
+"地铁没有出租车那么快。": "The subway isn't as fast as a taxi.",
+"我睡觉的时候，他在看电视。": "When I was sleeping, he was watching TV.",
+"我到他家的时候，他正在吃饭。": "When I got to his place, he was in the middle of eating.",
+"别打电话，他正在睡觉呢。": "Don't call, he's sleeping right now.",
+"我们在等你呢。": "We're waiting for you.",
+"电影快要开始了，我们快走吧。": "The movie is about to start, let's hurry.",
+"他明天就要走了。": "He's leaving tomorrow.",
+"我是坐火车来的。": "I came by train.",
+"你是什么时候来中国的？": "When did you come to China?",
+"他做饭做得很好吃。": "He cooks really tasty food.",
+"她唱歌唱得很好。": "She sings really well.",
+"我明天不去上班。": "I'm not going to work tomorrow.",
+"他上个星期没来上课。": "He didn't come to class last week.",
+"这个菜不辣。": "This dish isn't spicy.",
+"我会说一点儿中文。": "I can speak a little Chinese.",
+"请问，这儿可以刷卡吗？": "Excuse me, can I pay by card here?",
+"明天会下雨吗？": "Will it rain tomorrow?",
+"今天有点儿冷，多穿点儿衣服。": "It's a bit cold today, wear some extra layers.",
+"太辣了，可以少放一点儿辣椒吗？": "It's too spicy, could you use a little less chilli?",
+"这件衣服有点儿小，有大一点儿的吗？": "This is a bit small, do you have a slightly bigger one?",
+"你想吃米饭还是面条？": "Do you want rice or noodles?",
+"明天或者后天去都可以。": "Going tomorrow or the day after is fine either way.",
+"因为下雨了，所以我们没去长城。": "Because it rained, we didn't go to the Great Wall.",
+"虽然这家饭馆很贵，但是菜很好吃。": "Although this restaurant is expensive, the food is delicious.",
+"外面冷，快进来吧！": "It's cold outside, come on in!",
+"我出去买点儿水。": "I'm going out to buy some water.",
+"他说得太快，我没听懂。": "He spoke too fast, I didn't catch it.",
+"你的钱包找到了吗？": "Did you find your wallet?",
+"对不起，我写错了一个字。": "Sorry, I wrote a character wrong.",
+"请把门关上。": "Please close the door.",
+"我把咖啡喝完了。": "I finished the coffee.",
+"电影八点开始，他七点就到了。": "The movie started at eight, and he was already there by seven.",
+"飞机晚了三个小时，我们半夜才到酒店。": "The flight was three hours late, so we didn't get to the hotel until midnight.",
+"我想买两张票。": "I'd like to buy two tickets.",
+"他家有一只狗。": "His family has a dog.",
+"这条裤子太长了。": "These pants are too long.",
+"我想要两杯咖啡。": "I'd like two coffees.",
+"服务员，再来一碗米饭。": "Excuse me (waiter), another bowl of rice please.",
+"昨天下雨，今天又下雨了。": "It rained yesterday, and it's raining again today.",
+"她一边做饭，一边听音乐。": "She listens to music while she cooks.",
+"我一边吃饭一边看手机。": "I look at my phone while I eat."
+};
 function qG(id, j) {
   const g = GRAMMAR.find(x => x.id === id); const d = g && g.d[j]; if (!d) return null;
   if (d.t === "fill") {
@@ -951,7 +1004,7 @@ function qG(id, j) {
     const pickSentence = /^Pick the correct/.test(d.q);
     const full = pickSentence ? d.o[0] : d.q.replace("___", d.o[0]);
     return { key: `G:${id}:${j}`, kind: "choice", label: g.name, show: pickSentence ? "Which sentence is correct?" : d.q.replace("___", "＿＿"), plainShow: pickSentence,
-      opts: ch.opts.map(x => ({ zh: x })), answer: ch.answer, why: d.why, pattern: g, reveal: { zh: full.replace(/^\(.*?\)\s*/, "") } };
+      opts: ch.opts.map(x => ({ zh: x })), answer: ch.answer, why: d.why, pattern: g, reveal: (() => { const z = full.replace(/^\(.*?\)\s*/, ""); return { zh: z, en: FILL_EN[z] || "" }; })() };
   }
   const toks = d.zh.split(" ").filter(t => !isPunct(t));
   let tiles = shuffle(toks); let guard = 0;
