@@ -1,0 +1,37 @@
+name: Make audio pack
+
+on:
+  workflow_dispatch:
+    inputs:
+      dictionary:
+        description: "Also record every Look up word (about 45 minutes)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  audio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install edge-tts
+        run: pip install edge-tts
+
+      - name: Record clips
+        run: python make_audio.py ${{ inputs.dictionary && '--dictionary' || '' }}
+
+      - name: Commit the audio folder
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
+          git add audio
+          git commit -m "Update audio pack" || echo "No new clips"
+          git push
