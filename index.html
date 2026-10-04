@@ -216,6 +216,22 @@ ruby.xlpy rt{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size
 body.shiftpy .py{display:none}
 .shiftpy-tip{font-size:13px}
 .shiftpy-tip kbd{border:1px solid var(--line,#888);border-bottom-width:2px;border-radius:4px;padding:0 5px;font-size:12px}
+
+/* Hover a character: dictionary card + word highlight */
+.xl-hl{position:fixed;pointer-events:none;z-index:9998;border-radius:3px;background:color-mix(in srgb,var(--jade) 16%,transparent)}
+.xl-hl.cur{background:color-mix(in srgb,var(--jade) 34%,transparent);box-shadow:inset 0 -2px 0 var(--jade)}
+.xl-tip{position:fixed;z-index:9999;pointer-events:none;max-width:min(340px,calc(100vw - 16px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.18);padding:10px 12px;font-size:13px;line-height:1.45}
+.xl-tip[hidden]{display:none}
+.xl-tip .w{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.xl-tip .w .hz{font-size:22px;line-height:1.1}
+.xl-tip .w .p{font-size:14px;font-weight:600}
+.xl-tip .d{color:var(--ink);margin-top:2px}
+.xl-tip .alt{color:var(--muted);margin-top:4px;font-size:12px}
+.xl-tip .sep{border-top:1px solid var(--line);margin:8px 0 6px}
+.xl-tip .lbl{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.xl-tip .chars{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;align-items:baseline}
+.xl-tip .chars .hz{font-size:16px}
+.xl-tip .chars .cur{color:var(--jade)}
 </style>
 </head>
 <body>
@@ -1352,7 +1368,7 @@ function vMe() {
   else h += voiceWarning();
   h += `<label class="stack" style="gap:4px"><span class="muted" style="font-size:13px">Speed: <b id="ratev">${P.settings.rate.toFixed(2)}×</b></span><input type="range" id="rate" min="0.5" max="1.2" step="0.05" value="${P.settings.rate}" data-set="rate"></label>`;
   h += `<div class="row"><button class="btn sm" data-act="say" data-t="你好，我是你的中文老师。我们开始吧！">Test the voice</button></div>`;
-  h += `<label class="sw"><input type="checkbox" id="pinyin" data-set="pinyin" ${P.settings.pinyin ? "checked" : ""}> Show pinyin on answer options before I answer</label><div class="muted shiftpy-tip">On a computer, hold <kbd>Shift</kbd> to see pinyin over every character on the screen.</div></div>`;
+  h += `<label class="sw"><input type="checkbox" id="pinyin" data-set="pinyin" ${P.settings.pinyin ? "checked" : ""}> Show pinyin on answer options before I answer</label><div class="muted shiftpy-tip">On a computer, hold <kbd>Shift</kbd> to see pinyin over every character on the screen, and hover any character for its meaning (dictionary: CC-CEDICT).</div></div>`;
   if (STANDALONE) h += `<div class="card stack"><h3>Claude features</h3><div class="muted" style="font-size:14px">Menu scanning, the waiter chat and sentence checking need an Anthropic API key (from console.anthropic.com). It's stored only in this browser and sent only to Anthropic. Usage is billed to your API account.</div><input type="text" id="apikey" placeholder="sk-ant-…" value="${esc(API.key ? API.key.slice(0, 10) + "…" + API.key.slice(-4) : "")}" autocomplete="off"><input type="text" id="apimodel" value="${esc(API.model)}" aria-label="Model name"><div class="row"><button class="btn sm primary" data-act="apisave">Save</button>${API.key ? `<button class="btn sm ghost" data-act="apiclear">Remove key</button><span class="muted" style="font-size:13px">Key saved</span>` : ""}</div></div>`;
   h += `<div class="card stack"><h3>Your data</h3><div class="muted" style="font-size:14px">${store.mode === "cloud" ? "Progress is saved to your Claude account, so it follows you between your phone and computer." : (STANDALONE ? "Progress is saved in this browser only. Clearing browser data erases it, and it won't sync to other devices." : "Progress is saved in this browser only. Open the page signed in to the Claude app to save it to your account.")}</div>`;
   h += state.resetArm ? `<div class="row"><span>Erase all progress?</span><button class="btn sm" data-act="resetyes" style="border-color:var(--bad);color:var(--bad)">Yes, erase</button><button class="btn sm" data-act="resetno">Keep it</button></div>` : `<div><button class="btn sm ghost" data-act="reset">Reset progress</button></div>`;
@@ -1472,7 +1488,7 @@ function spyAnnotate(root) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(n) {
       const p = n.parentElement;
-      if (!p || p.closest("ruby.xlpy, script, style, textarea, input, select, option, [contenteditable]")) return NodeFilter.FILTER_REJECT;
+      if (!p || p.closest("ruby.xlpy, script, style, textarea, input, select, option, [contenteditable], .xl-tip")) return NodeFilter.FILTER_REJECT;
       HAN_RUN.lastIndex = 0;
       return HAN_RUN.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
     }
@@ -1544,6 +1560,151 @@ document.addEventListener("keyup", e => { if (e.key === "Shift") shiftPinyinOff(
 window.addEventListener("blur", shiftPinyinOff);
 document.addEventListener("visibilitychange", () => { if (document.hidden) shiftPinyinOff(); });
 setTimeout(loadPinyinLib, 1500);
+
+/* ===================== HOVER A CHARACTER ===================== */
+/* Hovering a Chinese character shows a small dictionary card. If the character is part of a
+   longer word, the whole word is highlighted and explained, with each character underneath.
+   Dictionary: CC-CEDICT (CC BY-SA 4.0), trimmed to common words, in dict.txt next to this page. */
+const HOV = { dict: null, loading: null, raf: 0, x: 0, y: 0, key: "", tip: null, hls: [] };
+const HAN1 = /[㐀-䶿一-鿿豈-﫿]/;
+const CAN_HOVER = window.matchMedia && matchMedia("(hover: hover) and (pointer: fine)").matches;
+function loadDict() {
+  if (HOV.dict) return Promise.resolve(HOV.dict);
+  if (HOV.loading) return HOV.loading;
+  HOV.loading = fetch("dict.txt").then(r => r.ok ? r.text() : Promise.reject(r.status)).then(t => {
+    const m = new Map();
+    for (const line of t.split("\n")) {
+      if (!line || line[0] === "#") continue;
+      const p = line.split("\t"), ents = [];
+      for (let k = 1; k + 1 < p.length; k += 2) ents.push({ py: p[k], en: p[k + 1] });
+      m.set(p[0], ents);
+    }
+    HOV.dict = m; return m;
+  }).catch(() => { HOV.loading = null; return null; });
+  return HOV.loading;
+}
+function hovCaret(x, y) {
+  if (document.caretPositionFromPoint) { const c = document.caretPositionFromPoint(x, y); return c && { node: c.offsetNode, off: c.offset }; }
+  if (document.caretRangeFromPoint) { const r = document.caretRangeFromPoint(x, y); return r && { node: r.startContainer, off: r.startOffset }; }
+  return null;
+}
+function charRange(node, i) { const r = document.createRange(); r.setStart(node, i); r.setEnd(node, i + 1); return r; }
+function hitChar(x, y) {
+  const c = hovCaret(x, y);
+  if (!c || !c.node || c.node.nodeType !== 3) return null;
+  const node = c.node, txt = node.nodeValue, el = node.parentElement;
+  if (!el || el.closest("rt, textarea, input, select, [contenteditable], .xl-tip")) return null;
+  for (const i of [c.off, c.off - 1]) {
+    if (i < 0 || i >= txt.length || !HAN1.test(txt[i])) continue;
+    const b = charRange(node, i).getBoundingClientRect();
+    if (x >= b.left - 1 && x <= b.right + 1 && y >= b.top - 2 && y <= b.bottom + 2) return { node, i };
+  }
+  return null;
+}
+/* the run of consecutive characters around the hit, as [{node, i, ch}] */
+function hovRun(hit) {
+  const rb = hit.node.parentElement.closest("ruby.xlpy");
+  if (rb) { /* Shift-pinyin mode: one character per <ruby> */
+    let a = rb; while (a.previousSibling && a.previousSibling.nodeType === 1 && a.previousSibling.matches("ruby.xlpy")) a = a.previousSibling;
+    const run = []; let at = 0;
+    for (let n = a; n && n.nodeType === 1 && n.matches("ruby.xlpy"); n = n.nextSibling) { if (n === rb) at = run.length; run.push({ node: n.firstChild, i: 0, ch: n.firstChild.nodeValue }); }
+    return { run, at };
+  }
+  const t = hit.node.nodeValue; let a = hit.i, b = hit.i;
+  while (a > 0 && HAN1.test(t[a - 1])) a--;
+  while (b < t.length - 1 && HAN1.test(t[b + 1])) b++;
+  const run = []; for (let k = a; k <= b; k++) run.push({ node: hit.node, i: k, ch: t[k] });
+  return { run, at: hit.i - a };
+}
+/* forward maximum matching against the dictionary, max 4 characters per word */
+function hovWord(str, at) {
+  let k = 0;
+  while (k < str.length) {
+    let len = Math.min(4, str.length - k);
+    while (len > 1 && !HOV.dict.has(str.substr(k, len))) len--;
+    if (at < k + len) return [k, len];
+    k += len;
+  }
+  return [at, 1];
+}
+const normPy = s => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
+function ctxPy(str) { try { return window.pinyinPro ? pinyinPro.pinyin(str, { type: "array" }) : null; } catch (e) { return null; } }
+function orderByPy(ents, want) {
+  if (!ents || !want) return ents || [];
+  const w = normPy(want), hit = ents.filter(e => normPy(e.py) === w);
+  return hit.length ? hit.concat(ents.filter(e => normPy(e.py) !== w)) : ents;
+}
+function tipHtml(word, chars, at, pys) {
+  const ents = orderByPy(HOV.dict.get(word), pys && pys.join(" "));
+  let h = "";
+  if (ents.length) {
+    h += `<div class="w"><span class="hz">${esc(word)}</span><span class="p">${pyHtml(ents[0].py)}</span></div><div class="d">${esc(ents[0].en)}</div>`;
+    if (ents[1]) h += `<div class="alt">Also ${pyHtml(ents[1].py)}: ${esc(ents[1].en)}</div>`;
+  } else {
+    h += `<div class="w"><span class="hz">${esc(word)}</span>${pys ? `<span class="p">${pyHtml(pys.join(" "))}</span>` : ""}</div><div class="alt">No dictionary entry</div>`;
+  }
+  if (chars.length > 1) {
+    h += `<div class="sep"></div><div class="lbl">Characters</div><div class="chars">`;
+    chars.forEach((c, k) => {
+      const e = orderByPy(HOV.dict.get(c), pys && pys[k])[0];
+      h += `<span class="hz${k === at ? " cur" : ""}">${esc(c)}</span><span>${e ? `${pyHtml(e.py)} · ${esc(e.en.split("; ").slice(0, 2).join("; "))}` : ""}</span>`;
+    });
+    h += `</div>`;
+  }
+  return h;
+}
+function hovClear() {
+  HOV.key = "";
+  HOV.hls.forEach(d => d.remove()); HOV.hls = [];
+  if (HOV.tip) HOV.tip.hidden = true;
+}
+function hovShow(hit) {
+  const { run, at } = hovRun(hit);
+  const str = run.map(r => r.ch).join("");
+  const [ws, wl] = hovWord(str, at);
+  const sig = str + "|" + ws + "|" + wl + "|" + at + "|" + (run[0].node && run[0].node.parentNode ? 1 : 0);
+  if (sig === HOV.key && HOV.tip && !HOV.tip.hidden) return;
+  hovClear(); HOV.key = sig;
+  /* highlight */
+  const rects = [];
+  for (let k = ws; k < ws + wl; k++) {
+    const r = charRange(run[k].node, run[k].i);
+    for (const b of r.getClientRects()) {
+      const d = document.createElement("div");
+      d.className = "xl-hl" + (k - ws === at - ws ? " cur" : "");
+      Object.assign(d.style, { left: b.left - 1 + "px", top: b.top + "px", width: b.width + 2 + "px", height: b.height + "px" });
+      document.body.appendChild(d); HOV.hls.push(d); rects.push(b);
+    }
+  }
+  /* card */
+  if (!HOV.tip) { HOV.tip = document.createElement("div"); HOV.tip.className = "xl-tip"; HOV.tip.setAttribute("role", "tooltip"); document.body.appendChild(HOV.tip); }
+  const word = str.substr(ws, wl), all = ctxPy(str);
+  HOV.tip.innerHTML = tipHtml(word, Array.from(word), at - ws, all ? all.slice(ws, ws + wl) : null);
+  HOV.tip.hidden = false;
+  const box = rects.reduce((a, b) => ({ left: Math.min(a.left, b.left), right: Math.max(a.right, b.right), top: Math.min(a.top, b.top), bottom: Math.max(a.bottom, b.bottom) }), { left: 1e9, right: -1e9, top: 1e9, bottom: -1e9 });
+  const tw = HOV.tip.offsetWidth, th = HOV.tip.offsetHeight, vw = innerWidth, vh = innerHeight;
+  let left = Math.max(8, Math.min(vw - tw - 8, box.left));
+  let top = box.bottom + 8;
+  if (top + th > vh - 8) top = Math.max(8, box.top - th - 8);
+  HOV.tip.style.left = left + "px"; HOV.tip.style.top = top + "px";
+}
+function hovTick() {
+  HOV.raf = 0;
+  const hit = hitChar(HOV.x, HOV.y);
+  if (!hit) { if (HOV.key) hovClear(); return; }
+  if (!HOV.dict) { loadDict().then(d => { if (d) hovTick(); }); return; }
+  hovShow(hit);
+}
+if (CAN_HOVER) {
+  document.addEventListener("mousemove", e => { HOV.x = e.clientX; HOV.y = e.clientY; if (!HOV.raf) HOV.raf = requestAnimationFrame(hovTick); }, { passive: true });
+  document.addEventListener("mouseleave", hovClear);
+  window.addEventListener("scroll", hovClear, { passive: true, capture: true });
+  window.addEventListener("blur", hovClear);
+  document.addEventListener("mousedown", hovClear);
+  document.addEventListener("keydown", e => { if (e.key === "Shift") setTimeout(() => { hovClear(); hovTick(); }, 30); });
+  document.addEventListener("keyup", e => { if (e.key === "Shift") setTimeout(() => { hovClear(); hovTick(); }, 30); });
+  setTimeout(loadDict, 2500);
+}
 
 /* ===================== BOOT ===================== */
 setSync("local");
