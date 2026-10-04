@@ -209,6 +209,13 @@ label.sw{display:flex;align-items:center;gap:8px;font-size:14px}
   @keyframes pulse{50%{opacity:.6}}
 }
 @media (max-width:420px){.prompt .hzbig{font-size:38px}.hero .big{font-size:46px}}
+
+/* Hold Shift: pinyin over every character */
+ruby.xlpy{ruby-position:over;ruby-align:center}
+ruby.xlpy rt{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:.48em;font-weight:500;letter-spacing:0;line-height:1;text-transform:none;font-style:normal}
+body.shiftpy .py{display:none}
+.shiftpy-tip{font-size:13px}
+.shiftpy-tip kbd{border:1px solid var(--line,#888);border-bottom-width:2px;border-radius:4px;padding:0 5px;font-size:12px}
 </style>
 </head>
 <body>
@@ -1292,7 +1299,7 @@ function vMe() {
   else h += voiceWarning();
   h += `<label class="stack" style="gap:4px"><span class="muted" style="font-size:13px">Speed: <b id="ratev">${P.settings.rate.toFixed(2)}×</b></span><input type="range" id="rate" min="0.5" max="1.2" step="0.05" value="${P.settings.rate}" data-set="rate"></label>`;
   h += `<div class="row"><button class="btn sm" data-act="say" data-t="你好，我是你的中文老师。我们开始吧！">Test the voice</button></div>`;
-  h += `<label class="sw"><input type="checkbox" id="pinyin" data-set="pinyin" ${P.settings.pinyin ? "checked" : ""}> Show pinyin on answer options before I answer</label></div>`;
+  h += `<label class="sw"><input type="checkbox" id="pinyin" data-set="pinyin" ${P.settings.pinyin ? "checked" : ""}> Show pinyin on answer options before I answer</label><div class="muted shiftpy-tip">On a computer, hold <kbd>Shift</kbd> to see pinyin over every character on the screen.</div></div>`;
   if (STANDALONE) h += `<div class="card stack"><h3>Claude features</h3><div class="muted" style="font-size:14px">Menu scanning, the waiter chat and sentence checking need an Anthropic API key (from console.anthropic.com). It's stored only in this browser and sent only to Anthropic. Usage is billed to your API account.</div><input type="text" id="apikey" placeholder="sk-ant-…" value="${esc(API.key ? API.key.slice(0, 10) + "…" + API.key.slice(-4) : "")}" autocomplete="off"><input type="text" id="apimodel" value="${esc(API.model)}" aria-label="Model name"><div class="row"><button class="btn sm primary" data-act="apisave">Save</button>${API.key ? `<button class="btn sm ghost" data-act="apiclear">Remove key</button><span class="muted" style="font-size:13px">Key saved</span>` : ""}</div></div>`;
   h += `<div class="card stack"><h3>Your data</h3><div class="muted" style="font-size:14px">${store.mode === "cloud" ? "Progress is saved to your Claude account, so it follows you between your phone and computer." : (STANDALONE ? "Progress is saved in this browser only. Clearing browser data erases it, and it won't sync to other devices." : "Progress is saved in this browser only. Open the page signed in to the Claude app to save it to your account.")}</div>`;
   h += state.resetArm ? `<div class="row"><span>Erase all progress?</span><button class="btn sm" data-act="resetyes" style="border-color:var(--bad);color:var(--bad)">Yes, erase</button><button class="btn sm" data-act="resetno">Keep it</button></div>` : `<div><button class="btn sm ghost" data-act="reset">Reset progress</button></div>`;
@@ -1388,6 +1395,102 @@ document.addEventListener("keydown", e => {
   if (!S.answered && q.kind === "order" && e.key === "Enter" && S.placed.length) { checkOrder(); return; }
   if ((e.key === "r" || e.key === "R") && tag !== "input" && q.audio) speak(q.audio);
 });
+
+/* ===================== HOLD SHIFT FOR PINYIN ===================== */
+/* Holding Shift puts tone-coloured pinyin over every Chinese character on screen.
+   Uses the pinyin-pro library (loaded on demand) so it works on any text,
+   including menus scanned by Claude and waiter replies. */
+const SPY = { on: false, lib: null, loading: null, obs: null, busy: false };
+const HAN_RUN = /[㐀-䶿一-鿿豈-﫿]+/g;
+function loadPinyinLib() {
+  if (SPY.lib) return Promise.resolve(SPY.lib);
+  if (SPY.loading) return SPY.loading;
+  SPY.loading = new Promise(res => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/pinyin-pro@3/dist/index.js";
+    s.onload = () => { SPY.lib = window.pinyinPro || null; res(SPY.lib); };
+    s.onerror = () => { SPY.loading = null; res(null); };
+    document.head.appendChild(s);
+  });
+  return SPY.loading;
+}
+function spyAnnotate(root) {
+  if (!SPY.lib || !root) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(n) {
+      const p = n.parentElement;
+      if (!p || p.closest("ruby.xlpy, script, style, textarea, input, select, option, [contenteditable]")) return NodeFilter.FILTER_REJECT;
+      HAN_RUN.lastIndex = 0;
+      return HAN_RUN.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    }
+  });
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  for (const n of nodes) {
+    const text = n.nodeValue, frag = document.createDocumentFragment();
+    let last = 0, m;
+    HAN_RUN.lastIndex = 0;
+    while ((m = HAN_RUN.exec(text))) {
+      if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+      const run = m[0], chars = Array.from(run);
+      let pys = [];
+      try { pys = SPY.lib.pinyin(run, { type: "array" }); } catch (err) { pys = []; }
+      chars.forEach((c, k) => {
+        const r = document.createElement("ruby");
+        r.className = "xlpy";
+        r.appendChild(document.createTextNode(c));
+        const rt = document.createElement("rt");
+        const py = pys.length === chars.length ? pys[k] : "";
+        rt.textContent = py;
+        rt.className = "t" + toneOf(py);
+        r.appendChild(rt);
+        frag.appendChild(r);
+      });
+      last = m.index + run.length;
+    }
+    if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+    n.parentNode.replaceChild(frag, n);
+  }
+}
+function spyStrip() {
+  document.querySelectorAll("ruby.xlpy").forEach(r => {
+    const t = document.createTextNode(r.firstChild ? r.firstChild.nodeValue : "");
+    const p = r.parentNode;
+    p.replaceChild(t, r);
+    p.normalize();
+  });
+}
+function spyRun(fn) {
+  if (SPY.obs) SPY.obs.disconnect();
+  fn();
+  if (SPY.on && SPY.obs) SPY.obs.observe(document.body, { childList: true, subtree: true, characterData: true });
+}
+async function shiftPinyinOn() {
+  if (SPY.on) return;
+  SPY.on = true;
+  document.body.classList.add("shiftpy");
+  const lib = await loadPinyinLib();
+  if (!SPY.on || !lib) { if (!lib) document.body.classList.remove("shiftpy"); return; }
+  if (!SPY.obs) SPY.obs = new MutationObserver(() => { if (SPY.on && !SPY.busy) { SPY.busy = true; spyRun(() => spyAnnotate(document.body)); SPY.busy = false; } });
+  spyRun(() => spyAnnotate(document.body));
+}
+function shiftPinyinOff() {
+  if (!SPY.on) return;
+  SPY.on = false;
+  if (SPY.obs) SPY.obs.disconnect();
+  spyStrip();
+  document.body.classList.remove("shiftpy");
+}
+document.addEventListener("keydown", e => {
+  if (e.key !== "Shift" || e.repeat) return;
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (tag === "textarea" || tag === "input" || tag === "select" || e.target.isContentEditable) return;
+  shiftPinyinOn();
+});
+document.addEventListener("keyup", e => { if (e.key === "Shift") shiftPinyinOff(); });
+window.addEventListener("blur", shiftPinyinOff);
+document.addEventListener("visibilitychange", () => { if (document.hidden) shiftPinyinOff(); });
+setTimeout(loadPinyinLib, 1500);
 
 /* ===================== BOOT ===================== */
 setSync("local");
