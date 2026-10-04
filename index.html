@@ -248,6 +248,22 @@ body.shiftpy .py{display:none}
 :root[data-theme="dark"]{--w0:#79A6FF;--w1:#F2B33D;--w2:#52C4A0;--w3:#FF7A66;--w4:#C39BFF}
 .wc0{color:var(--w0)}.wc1{color:var(--w1)}.wc2{color:var(--w2)}.wc3{color:var(--w3)}.wc4{color:var(--w4)}
 .py .pw + .pw{margin-left:.5em}
+
+/* Character parts in the hover card */
+.xl-tip .parts{grid-column:2;font-size:12px;color:var(--muted);margin:-1px 0 3px}
+.xl-tip b.key,.xl-tip .parts b{font-family:var(--f-hz);font-weight:600;color:var(--ink);font-size:13px}
+.xl-tip .parts .snd{color:var(--jade)}
+.xl-tip .key{color:var(--seal)!important;font-weight:600}.xl-tip .alt b{font-family:var(--f-hz);font-weight:600;color:var(--ink)}
+/* Radicals guide */
+.radgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.rad{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start}
+.rad .rf{font-family:var(--f-hz);font-weight:600;font-size:34px;line-height:1.1;color:var(--jade);min-width:46px;text-align:center}
+.rad .rf small{display:block;font-size:12px;font-family:var(--f-ui);color:var(--muted);font-weight:500}
+.rad .rm b{font-size:15px}
+.rad .rm .tip{font-size:13px;color:var(--muted);margin-top:2px}
+.rad .rex{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.rad .rex span{font-family:var(--f-hz);font-weight:600;font-size:20px;padding:2px 8px;border:1px solid var(--line);border-radius:8px;cursor:pointer}
+.clickzh{cursor:pointer}
 </style>
 </head>
 <body>
@@ -645,6 +661,11 @@ const GRAMMAR = [
       {t:"order",zh:"别 一边 开车 一边 打 电话",en:"Don't talk on the phone while driving."}]}
 ];
 /* ===================== HELPERS ===================== */
+/* Important radicals: [forms, pinyin, meaning, tip, example characters] */
+const RADICALS = [["亻 人", "rén", "person", "Most characters about people and what they do.", "你他们住休做"], ["口", "kǒu", "mouth", "Eating, speaking, and sentence particles (吗 呢 吧).", "吃喝叫吗呢唱"], ["氵 水", "shuǐ", "water", "Three drops: rivers, seas, washing, liquids.", "河海洗汤酒没"], ["扌 手", "shǒu", "hand", "Actions you do with your hands.", "打找拿把推拉"], ["讠 言", "yán", "speech", "Speaking, language and words.", "说话语请谢读"], ["女", "nǚ", "woman", "Female relatives and some qualities.", "妈姐妹好她姓"], ["木", "mù", "tree, wood", "Trees, wooden things, furniture.", "树林桌椅杯果"], ["艹 草", "cǎo", "grass, plant", "Plants, vegetables, tea, flowers, medicine.", "菜茶花药苹"], ["忄 心", "xīn", "heart, mind", "Feelings and thinking. Side form 忄, bottom form 心.", "想忙快慢怕思"], ["饣 食", "shí", "food, eat", "Meals and eating. Very handy on menus.", "饭饿饱饺馆"], ["钅 金", "jīn", "metal, gold", "Metals, money, clocks.", "钱银铁钟错"], ["纟 丝", "sī", "silk, thread", "Thread, colours of dye, and connecting things.", "红绿给经练线"], ["辶", "chuò", "walk, movement", "The sweeping stroke under a word: going, distance, direction.", "这还进远近送"], ["日", "rì", "sun, day", "Time of day, brightness, weather.", "明早晚时昨晴"], ["月", "yuè", "moon / body", "Two origins: moon (time) and flesh (body parts).", "朋期脸脚腿肚"], ["火 灬", "huǒ", "fire", "Cooking and heat. Four dots at the bottom (灬) are also fire.", "灯烤炒热点照"], ["土", "tǔ", "earth", "Ground, places, sitting.", "地场坐在块城"], ["宀", "mián", "roof", "Buildings and things under a roof.", "家字安室客定"], ["门", "mén", "door, gate", "Doors and openings.", "问间闭闹闻"], ["车", "chē", "vehicle", "Vehicles and things that turn.", "辆输转轻软"], ["⻊ 足", "zú", "foot", "Feet, walking, running, kicking.", "跑跳路踢跟"], ["目", "mù", "eye", "Seeing and eyes.", "看眼睛睡"], ["疒", "nè", "illness", "Sickness and pain.", "病疼痛瘦"], ["衤 衣", "yī", "clothing", "Clothes. Watch out: 衤 has two dots, 礻 has one.", "衬衫裤裙袜"], ["礻 示", "shì", "spirit, ritual", "Blessings, rituals, the divine.", "礼祝福神视"], ["刂 刀", "dāo", "knife", "Cutting, and things that divide.", "别到刚刻前剪"], ["力", "lì", "strength", "Effort, movement, work.", "加动办男助努"], ["彳", "chì", "step", "A 'double person': walking and conduct.", "很得往街行"], ["贝", "bèi", "shell, money", "Shells were money: price, cost, goods.", "贵费货贴赢"], ["石", "shí", "stone", "Stones, and hard things like bowls.", "碗破碰研砂"], ["雨", "yǔ", "rain", "Weather on top: snow, thunder, fog.", "雪雷雾零需"], ["⺮ 竹", "zhú", "bamboo", "Bamboo objects: pens, chopsticks, counting.", "笔筷第等答算"], ["米", "mǐ", "rice", "Rice, grain, flour, sugar.", "粉糖精粥糕"], ["犭", "quǎn", "dog, animal", "Animals, especially mammals.", "猫狗猪狮猴"], ["鸟", "niǎo", "bird", "Birds and poultry: chicken, duck, goose.", "鸡鸭鸽鹅"], ["鱼", "yú", "fish", "Fish and seafood. 鲜 = fresh.", "鲜鲸鲨"], ["王 玉", "yù", "jade", "As a side part, 王 means jade: precious, polished things.", "玩球现班理"], ["囗", "wéi", "enclosure", "A box around: borders, countries, gardens.", "国图园回四因"], ["冫", "bīng", "ice", "Two drops: cold and ice. (Three drops 氵 is water.)", "冰冷凉冻准"], ["页", "yè", "head, page", "Head and face; also pages.", "题颜顾顺额"], ["阝", "fù / yì", "mound / city", "On the left it means mound or hill; on the right it means city.", "阳院陪都部那"], ["攵", "pū", "strike, action", "Doing or causing something.", "教放收数改"], ["酉", "yǒu", "wine jar", "Alcohol and fermented things: wine, vinegar, sour.", "酒醉醋酸配"], ["广", "guǎng", "shelter", "A roof with one wall: shops and buildings.", "店床应座度"], ["子", "zǐ", "child", "Children, learning, words.", "字孩学存孙"], ["山", "shān", "mountain", "Mountains, islands, cliffs.", "岛岁峰岸"]];
+/* meanings of components (from HanziJS radical list), used in the hover card */
+const RAD_MEAN = {"亻": "human", "卩": "seal", "土": "earth", "宀": "roof", "冖": "cover", "曰": "say", "山": "mountain", "巾": "turban/scarf", "广": "house on cliff", "辶": "walk", "心": "heart", "手": "hand", "扌": "hand", "日": "sun/day", "⺙": "knock", "木": "tree", "饣": "eat/food", "欠": "yawn", "氵": "water", "火": "fire", "石": "stone", "田": "field", "⺮": "bamboo", "米": "rice", "虫": "insect", "忄": "heart", "血": "blood", "月": "moon", "讠": "speech", "犭": "dog", "走": "run", "身": "body", "寸": "thumb", "钅": "metal/gold", "立": "stand erect", "风": "wind", "马": "horse", "大": "big", "鬼": "ghost/demon", "鱼": "fish", "鸟": "bird", "麦": "wheat", "一": "one", "亅": "hook", "乚": "second", "丨": "line", "丿": "bend", "十": "ten", "二": "two", "⺊": "divination", "卜": "divination", "刀": "knife", "斤": "axe", "厶": "private", "丷": "eight/divide", "口": "mouth", "丶": "dot", "冂": "upside down box", "亠": "lid", "王": "jade", "勹": "wrap", "禾": "grain", "幺": "short/tiny", "斗": "dipper", "母": "do not", "舌": "tongue", "⺈": "knife", "彑": "pig snout", "文": "script/literature", "而": "beard", "匸": "hiding enclosure", "几": "table", "人": "human", "力": "power/force", "厂": "cliff", "八": "eight/divide", "⺀": "dot", "子": "child", "士": "scholar", "工": "work", "弋": "arrow", "比": "compare/compete", "牛": "cow", "方": "square/raft", "止": "stop", "殳": "weapon/lance", "支": "branch", "犬": "dog", "戈": "spear", "牙": "fang", "玄": "dark/profound", "白": "white", "𠂇": "left hand", "示": "sign", "用": "use", "瓦": "tile", "老": "old", "羊": "sheep", "耳": "ear", "艮": "stopping", "至": "arrive", "匕": "spoon", "舟": "boat", "衣": "clothes", "覀": "west", "糸": "silk", "足": "foot", "见": "see", "谷": "valley", "里": "village/mile", "言": "speech", "非": "wrong", "夂": "go", "长": "long/grow", "门": "gate", "青": "green/blue", "目": "eye", "韦": "tanned leather", "面": "face", "自": "self", "灬": "fire", "豕": "pig", "又": "right hand", "户": "door/house", "隹": "small bird", "齐": "even/uniformly", "龍": "dragon", "儿": "legs", "凵": "container", "⺧": "cow", "⺌": "small", "毛": "fur/hair", "冫": "ice", "水": "water", "尸": "corpse", "刂": "knife", "干": "dry", "歹": "death/decay", "衤": "clothes", "豆": "bean", "贝": "shell", "鼻": "nose", "革": "leather", "生": "life", "巳": "oneself", "缶": "jar", "匚": "box", "川": "river", "艹": "grass", "辛": "bitter", "车": "car", "小": "small", "⺁": "cliff", "夕": "evening/unset", "瓜": "melon", "甘": "sweet", "西": "west", "赤": "red/bare", "角": "horn", "辰": "morning", "邑": "town", "金": "metal/gold", "彳": "step", "音": "sound", "食": "eat/food", "高": "tall", "鬲": "tripod/cauldron", "麻": "hemp", "无": "have not", "黑": "black", "⻭": "tooth/molar", "彐": "pig snout", "齿": "tooth/molar", "臣": "minister/official", "龙": "dragon", "页": "leaf", "囗": "enclosure", "女": "woman", "玉": "jade", "己": "oneself", "爪": "claw/talon", "皮": "skin", "阝": "town", "聿": "brush", "阜": "mound/dam", "隶": "slave/capture", "丬": "split wood", "弓": "bow", "镸": "long/grow", "爫": "claw/talon", "韋": "tanned leather", "耂": "old", "皿": "dish", "貝": "shell", "尢": "lame", "尣": "lame", "⺕": "pig snout", "穴": "cave", "鳥": "bird", "巛": "river", "⺍": "small", "纟": "silk", "氏": "clan", "廴": "long stride", "廾": "two hands/twenty/arch", "氺": "water", "彡": "bristle/beard", "釆": "distinguish/choose", "气": "steam/breath", "虍": "tiger stripes", "齊": "even/uniformly", "爿": "split wood", "戶": "door/house", "羽": "feather", "車": "car", "骨": "bone", "龵": "hand", "攴": "knock", "父": "father", "旡": "have not", "礻": "sign", "舛": "opposite", "矛": "spear", "行": "go/do", "臼": "mortar", "疋": "bolt of cloth", "矢": "arrow", "毋": "do not", "⺄": "second", "入": "enter", "靑": "green/blue", "馬": "horse", "鹿": "deer", "黾": "frog", "龠": "flute", "片": "a slice", "耒": "plow", "⺪": "bolt of cloth", "疒": "sickness", "鼠": "rat/mouse", "癶": "footsteps", "罒": "net", "鼓": "drum", "卤": "salt", "禸": "track", "⺺": "brush", "長": "long/grow", "巜": "river", "糹": "silk", "色": "color/prettiness", "爻": "mix/twine/cross", "⺳": "net", "网": "net", "⺶": "sheep", "肉": "meat", "⺼": "meat", "首": "head", "屮": "sprout", "雨": "rain", "見": "see", "酉": "wine/alcohol", "豸": "cat/badger", "⻊": "foot", "門": "gate", "頁": "leaf", "風": "wind", "香": "fragrant", "髟": "hair", "鬥": "fight", "龟": "turtle", "魚": "fish", "鹵": "salt", "麥": "wheat", "黹": "embroidery", "黽": "frog", "鼎": "sacrificial tripod", "齒": "tooth/molar", "龜": "turtle"};
+const KEY_RAD = new Set(RADICALS.flatMap(r => r[0].split(" ")));
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const DAY = 86400000;
@@ -1398,9 +1419,19 @@ function vListen() {
 
 /* --- grammar tab --- */
 function mastery(g) { const ks = g.d.map((_, j) => `G:${g.id}:${j}`); return ks.reduce((s, k) => s + Math.min(3, (P.items[k] || {}).reps || 0), 0) / (3 * ks.length); }
+function vRadicals() {
+  let h = `<section class="stack"><div class="row"><button class="iconbtn" data-act="radclose" aria-label="Back">${ICON.back || "‹"}</button><span class="eyebrow">部首 bù shǒu · radicals</span></div>`;
+  h += `<div class="card stack"><h2 style="margin:0">The building blocks</h2><p style="margin:0">Most characters are a <b>meaning part</b> (the radical) plus a <b>sound part</b>. In 妈 mā, 女 says "it's about a woman" and 马 mǎ hints at the sound. Learn these ${RADICALS.length} and you can guess the topic of most new characters.</p><p class="muted" style="margin:0;font-size:13px">Click any character to hear it. Hover one to see its parts: the radical is shown in red, and a part that hints at the sound is marked (sound).</p></div><div class="radgrid">`;
+  RADICALS.forEach(([forms, py, mean, tip, ex]) => {
+    const f = forms.split(" ");
+    h += `<div class="rad"><div class="rf">${esc(f[0])}${f[1] ? `<small>full form ${esc(f[1])}</small>` : ""}</div><div class="rm"><b>${esc(mean)}</b> <span class="py">${pyTone(py)}</span><div class="tip">${esc(tip)}</div></div><div class="rex">${Array.from(ex).map(c => `<span>${esc(c)}</span>`).join("")}</div></div>`;
+  });
+  return h + `</div></section>`;
+}
 function vGrammar() {
+  if (state.radOpen) return vRadicals();
   if (state.gOpen) return vPattern(GRAMMAR.find(g => g.id === state.gOpen));
-  let h = `<section class="stack"><div class="card stack"><h3>Grammar mix</h3><div class="muted" style="font-size:14px">Five drills from patterns that are due or new: gap fills and word order. Tap a pattern below to study it first.</div><button class="btn primary" data-act="round" data-p="G" data-title="Grammar mix">Start grammar round${dueKeys(["G"]).length ? ` · ${dueKeys(["G"]).length} due` : ""}</button></div><div class="glist">`;
+  let h = `<section class="stack"><div class="card stack"><h3>Grammar mix</h3><div class="muted" style="font-size:14px">Five drills from patterns that are due or new: gap fills and word order. Tap a pattern below to study it first.</div><button class="btn primary" data-act="round" data-p="G" data-title="Grammar mix">Start grammar round${dueKeys(["G"]).length ? ` · ${dueKeys(["G"]).length} due` : ""}</button></div><button class="gitem" data-act="radopen"><span class="hz">部首</span><span><b>Radicals: the building blocks</b><small>${RADICALS.length} key parts that tell you what a character is about</small></span><span></span></button><div class="glist">`;
   GRAMMAR.forEach(g => { const m = mastery(g); h += `<button class="gitem" data-act="gopen" data-id="${g.id}"><span class="hz">${esc(g.zh)}</span><span><b>${esc(g.name)}</b><small>HSK ${g.hsk} · ${esc(g.s)}</small></span><span class="mini"><span class="bar"><i style="width:${Math.round(m * 100)}%"></i></span></span></button>`; });
   return h + `</div></section>`;
 }
@@ -1465,7 +1496,9 @@ document.addEventListener("click", e => {
   const el = e.target.closest("[data-act]"); if (!el) return;
   const a = el.dataset.act; const q = S && !S.summary ? S.qs[S.i] : null;
   switch (a) {
-    case "tab": S = null; state.tab = el.dataset.tab; state.gOpen = null; render(); window.scrollTo(0, 0); break;
+    case "tab": S = null; state.tab = el.dataset.tab; state.gOpen = null; state.radOpen = false; render(); window.scrollTo(0, 0); break;
+    case "radopen": state.radOpen = true; render(); window.scrollTo(0, 0); break;
+    case "radclose": state.radOpen = false; render(); window.scrollTo(0, 0); break;
     case "say": speak(el.dataset.t); break;
     case "slow": speak(el.dataset.t, true); break;
     case "replay": q && speak(q.audio); break;
@@ -1646,7 +1679,7 @@ setTimeout(loadPinyinLib, 1500);
 /* Hovering a Chinese character shows a small dictionary card. If the character is part of a
    longer word, the whole word is highlighted and explained, with each character underneath.
    Dictionary: CC-CEDICT (CC BY-SA 4.0), trimmed to common words, in dict.txt next to this page. */
-const HOV = { dict: null, loading: null, raf: 0, x: 0, y: 0, key: "", tip: null, hls: [] };
+const HOV = { dict: null, parts: new Map(), loading: null, raf: 0, x: 0, y: 0, key: "", tip: null, hls: [] };
 const HAN1 = /[㐀-䶿一-鿿豈-﫿]/;
 const CAN_HOVER = window.matchMedia && matchMedia("(hover: hover) and (pointer: fine)").matches;
 function loadDict() {
@@ -1656,6 +1689,7 @@ function loadDict() {
     const m = new Map();
     for (const line of t.split("\n")) {
       if (!line || line[0] === "#") continue;
+      if (line[0] === "@") { const t = line.indexOf("\t"); HOV.parts.set(line.slice(1, t), line.slice(t + 1).split(" ")); continue; }
       const p = line.split("\t"), ents = [];
       for (let k = 1; k + 1 < p.length; k += 2) ents.push({ py: p[k], en: p[k + 1] });
       m.set(p[0], ents);
@@ -1715,12 +1749,25 @@ function orderByPy(ents, want) {
   const w = normPy(want), hit = ents.filter(e => normPy(e.py) === w);
   return hit.length ? hit.concat(ents.filter(e => normPy(e.py) !== w)) : ents;
 }
+/* "女 woman + 马 horse (sound)" for one character */
+function partsHtml(c, py) {
+  const parts = HOV.parts.get(c); if (!parts) return "";
+  const bare = x => plainPy(x).replace(/^(zh|ch|sh|[bpmfdtnlgkhjqxrzcsyw])/, "");
+  const me = plainPy(py || ((HOV.dict.get(c) || [])[0] || {}).py || "");
+  return parts.map(x => {
+    const e = (HOV.dict.get(x) || [])[0];
+    const mean = RAD_MEAN[x] || (e ? e.en.split("; ")[0] : "");
+    const snd = e && me && (plainPy(e.py) === me || (bare(e.py) && bare(e.py) === bare(me)));
+    return `<b class="${KEY_RAD.has(x) ? "key" : ""}">${esc(x)}</b> ${esc(mean)}${snd ? ` <span class="snd">(sound)</span>` : ""}`;
+  }).join(" + ");
+}
 function tipHtml(word, chars, at, pys) {
   const ents = orderByPy(HOV.dict.get(word), pys && pys.join(" "));
   let h = "";
   if (ents.length) {
     h += `<div class="w"><span class="hz">${esc(word)}</span><span class="p">${pyHtml(ents[0].py)}</span></div><div class="d">${esc(ents[0].en)}</div>`;
     if (ents[1]) h += `<div class="alt">Also ${pyHtml(ents[1].py)}: ${esc(ents[1].en)}</div>`;
+    if (chars.length === 1) { const pt = partsHtml(word, ents[0].py); if (pt) h += `<div class="alt">Parts: ${pt}</div>`; }
   } else {
     h += `<div class="w"><span class="hz">${esc(word)}</span>${pys ? `<span class="p">${pyHtml(pys.join(" "))}</span>` : ""}</div><div class="alt">No dictionary entry</div>`;
   }
@@ -1729,10 +1776,11 @@ function tipHtml(word, chars, at, pys) {
     chars.forEach((c, k) => {
       const e = orderByPy(HOV.dict.get(c), pys && pys[k])[0];
       h += `<span class="hz${k === at ? " cur" : ""}">${esc(c)}</span><span>${e ? `${pyHtml(e.py)} · ${esc(e.en.split("; ").slice(0, 2).join("; "))}` : ""}</span>`;
+      const pt = partsHtml(c, e && e.py); if (pt) h += `<span></span><span class="parts">${pt}</span>`;
     });
     h += `</div>`;
   }
-  return h;
+  return h + `<div class="alt" style="margin-top:6px">Click to hear it</div>`;
 }
 function hovClear() {
   HOV.key = "";
@@ -1902,6 +1950,24 @@ function dragDrop(e) {
 document.addEventListener("pointerup", dragDrop);
 document.addEventListener("pointercancel", e => { if (DRG.on && e.pointerId === DRG.pid) dragEnd(); });
 document.addEventListener("click", e => { if (DRG.skipClick) { e.stopPropagation(); e.preventDefault(); DRG.skipClick = false; } }, true);
+
+/* ===================== CLICK A CHARACTER TO HEAR IT ===================== */
+/* Clicking (or tapping) a character on plain text says the character, then the word it belongs to.
+   On buttons and tiles, hold Alt (Option on a Mac) while clicking so the button doesn't fire. */
+document.addEventListener("click", e => {
+  const hit = hitChar(e.clientX, e.clientY); if (!hit) return;
+  const onControl = e.target.closest("button, a, input, textarea, select, label, [data-act], .tile");
+  if (onControl && !e.altKey) return;
+  if (onControl) { e.preventDefault(); e.stopPropagation(); }
+  const { run, at } = hovRun(hit), str = run.map(r => r.ch).join("");
+  let word = str[at];
+  if (HOV.dict) { const [ws, wl] = hovWord(str, at); word = str.substr(ws, wl); hovShow(hit); }
+  speak(word.length > 1 ? str[at] + "，" + word : word);
+}, true);
+if (!CAN_HOVER) { /* touch screens: the card from a tap goes away when you scroll or tap elsewhere */
+  window.addEventListener("scroll", hovClear, { passive: true, capture: true });
+  document.addEventListener("pointerdown", e => { if (!hitChar(e.clientX, e.clientY)) hovClear(); }, true);
+}
 
 /* ===================== BOOT ===================== */
 setSync("local");
