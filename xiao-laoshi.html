@@ -1,0 +1,1399 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#13715A">
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px)}</style>
+<title>Xiǎo Lǎoshī</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;900&display=swap">
+<style>
+/* Layout: a phone-first study app. Celadon porcelain ground, ink text, jade accent,
+   seal-red stamps for menu badges; pinyin coloured by tone (1 red, 2 amber, 3 green, 4 blue). */
+:root{
+  --paper:#EEF3EF; --card:#FFFFFF; --ink:#17201C; --muted:#5A6A63; --line:#D5E0D9;
+  --jade:#13715A; --jade-ink:#FFFFFF; --jade-soft:#DDEEE6; --seal:#B3352B; --seal-soft:#F6E3E0;
+  --good:#1D7D45; --good-soft:#DFF2E6; --bad:#B42F2F; --bad-soft:#F8E1E1;
+  --t1:#C93A2A; --t2:#B97400; --t3:#22803A; --t4:#2459BE; --t5:#7D8A84;
+  --shadow:0 1px 2px rgba(20,40,30,.06),0 4px 14px rgba(20,40,30,.06);
+  --f-hz:"Noto Serif SC","Songti SC","SimSun",serif;
+  --f-ui:"Noto Sans","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --f-sc:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0F1513; --card:#18201D; --ink:#E4ECE7; --muted:#93A39B; --line:#2A3631;
+  --jade:#52C4A0; --jade-ink:#06231A; --jade-soft:#17342A; --seal:#E0685C; --seal-soft:#3A1F1C;
+  --good:#5BCB86; --good-soft:#163323; --bad:#F07C7C; --bad-soft:#3A1C1C;
+  --t1:#FF7A66; --t2:#F2B33D; --t3:#62D07A; --t4:#79A6FF; --t5:#8E9C96;
+  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --paper:#0F1513; --card:#18201D; --ink:#E4ECE7; --muted:#93A39B; --line:#2A3631;
+  --jade:#52C4A0; --jade-ink:#06231A; --jade-soft:#17342A; --seal:#E0685C; --seal-soft:#3A1F1C;
+  --good:#5BCB86; --good-soft:#163323; --bad:#F07C7C; --bad-soft:#3A1C1C;
+  --t1:#FF7A66; --t2:#F2B33D; --t3:#62D07A; --t4:#79A6FF; --t5:#8E9C96;
+  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--jade);outline-offset:2px}
+.hz{font-family:var(--f-hz);font-weight:600}
+.sc{font-family:var(--f-sc)}
+.muted{color:var(--muted)}
+.t1{color:var(--t1)}.t2{color:var(--t2)}.t3{color:var(--t3)}.t4{color:var(--t4)}.t5{color:var(--t5)}
+.py{font-family:var(--f-ui);letter-spacing:.01em}
+
+.app{max-width:680px;margin:0 auto;padding-inline:16px;padding-block:0 96px;min-height:100%}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);display:flex;align-items:center;gap:12px;padding-block:12px}
+.brand{display:flex;align-items:baseline;gap:10px;flex:1;min-width:0}
+.brand .hz{font-size:26px;font-weight:900;letter-spacing:.04em}
+.brand .py{color:var(--muted);font-size:13px}
+.sync{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--t5)}
+.dot.on{background:var(--good)}
+
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabbar nav{max-width:680px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.tab{background:none;border:0;padding:8px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--muted)}
+.tab .hz{font-size:18px;line-height:1.2}
+.tab small{font-size:11px}
+.tab[aria-current="true"]{color:var(--jade)}
+.tab[aria-current="true"] .hz{font-weight:900}
+
+h1,h2,h3{text-wrap:balance;margin:0}
+h2{font-size:19px}
+h3{font-size:16px}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.stack{display:flex;flex-direction:column;gap:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);min-width:0}
+.section-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:10px}
+
+.btn{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:9px 16px;font-weight:600;display:inline-flex;align-items:center;gap:8px;min-height:40px}
+.btn:hover{border-color:var(--jade)}
+.btn.primary{background:var(--jade);color:var(--jade-ink);border-color:var(--jade)}
+.btn.block{width:100%;justify-content:center;min-height:48px;font-size:16px}
+.btn.ghost{background:transparent}
+.btn.sm{padding:5px 12px;min-height:32px;font-size:13px}
+.btn[disabled]{opacity:.5;cursor:default}
+.iconbtn{border:1px solid var(--line);background:var(--card);border-radius:50%;width:40px;height:40px;display:inline-grid;place-items:center;flex:none}
+.iconbtn.lg{width:72px;height:72px;background:var(--jade);border-color:var(--jade);color:var(--jade-ink)}
+.iconbtn svg{width:18px;height:18px}
+.iconbtn.lg svg{width:30px;height:30px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:4px 10px;font-size:13px}
+.chip[aria-pressed="true"]{background:var(--jade-soft);border-color:var(--jade);color:var(--ink)}
+
+/* today */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.hero .big{font-family:var(--f-hz);font-weight:900;font-size:56px;line-height:1;color:var(--jade)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--paper);border-radius:10px;padding:10px;text-align:center}
+.stat b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.modes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.mode{text-align:left;border:1px solid var(--line);background:var(--card);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:4px;min-height:96px;box-shadow:var(--shadow)}
+.mode:hover{border-color:var(--jade)}
+.mode .hz{font-size:22px}
+.mode b{font-size:14px}
+.mode span{font-size:12.5px;color:var(--muted)}
+.mode .due{align-self:flex-start;font-size:11px;background:var(--seal-soft);color:var(--seal);border-radius:999px;padding:1px 8px;font-weight:700}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--jade);border-radius:3px}
+
+/* quiz */
+.quiz{display:flex;flex-direction:column;gap:16px;padding-top:4px}
+.qhead{display:flex;align-items:center;gap:12px}
+.pips{display:flex;gap:6px;flex:1}
+.pips i{flex:1;height:6px;border-radius:3px;background:var(--line)}
+.pips i.ok{background:var(--good)}.pips i.no{background:var(--bad)}.pips i.cur{background:var(--jade)}
+.prompt{text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;padding:22px 16px}
+.prompt .label{font-size:13px;color:var(--muted);font-weight:600}
+.prompt .hzbig{font-family:var(--f-hz);font-weight:600;font-size:44px;line-height:1.25;word-break:break-all}
+.prompt .hzmed{font-family:var(--f-hz);font-weight:600;font-size:28px;line-height:1.4}
+.playrow{display:flex;gap:14px;align-items:center;justify-content:center}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;min-height:52px}
+.opt:hover:not([disabled]){border-color:var(--jade)}
+.opt .k{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:0 6px;flex:none;margin-top:2px}
+.opt .ot{display:flex;flex-direction:column;min-width:0}
+.opt .ot .hz{font-size:20px}
+.opt .ot .py{font-size:13px}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt[disabled]{cursor:default}
+.tiles{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:52px}
+.answerline{border-bottom:2px dashed var(--line);padding-block:8px;justify-content:flex-start}
+.tile{border:1.5px solid var(--line);background:var(--card);border-radius:10px;padding:6px 12px;font-family:var(--f-hz);font-weight:600;font-size:22px;box-shadow:var(--shadow)}
+.tile.used{visibility:hidden}
+.numin{font-size:28px;text-align:center;padding:10px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);width:100%;font-variant-numeric:tabular-nums}
+.feedback{border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:8px}
+.feedback.ok{background:var(--good-soft)}
+.feedback.no{background:var(--bad-soft)}
+.feedback .verdict{font-weight:700}
+.feedback.ok .verdict{color:var(--good)}
+.feedback.no .verdict{color:var(--bad)}
+.reveal .hz{font-size:24px}
+.why{font-size:14px}
+.sticky-next{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));}
+
+/* summary */
+.sumlist{display:flex;flex-direction:column;gap:6px}
+.sumrow{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.sumrow .mk{font-weight:700;width:18px}
+.sumrow .mk.ok{color:var(--good)}.sumrow .mk.no{color:var(--bad)}
+
+/* menu */
+.menu-sheet{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:22px 18px;box-shadow:var(--shadow);position:relative}
+.menu-sheet::before{content:"";position:absolute;inset:6px;border:1px solid var(--line);border-radius:3px;pointer-events:none}
+.menu-head{text-align:center;display:flex;flex-direction:column;gap:2px;margin-bottom:12px}
+.menu-head .hz{font-size:30px;font-weight:900;letter-spacing:.2em}
+.msec{margin-top:18px}
+.msec-h{display:flex;align-items:baseline;gap:10px;justify-content:center;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:6px}
+.msec-h .hz{font-size:20px;letter-spacing:.3em}
+.dish{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 2px;border-bottom:1px dotted var(--line)}
+.dish-line{display:flex;align-items:baseline;gap:8px}
+.dish-line .hz{font-size:19px}
+.lead{flex:1;border-bottom:1px dotted var(--muted);opacity:.5;transform:translateY(-4px);min-width:12px}
+.price{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.price small{color:var(--muted);font-weight:400}
+.stamp{font-family:var(--f-hz);font-weight:900;font-size:11px;color:var(--seal);border:1.5px solid var(--seal);border-radius:3px;padding:0 3px;transform:rotate(-6deg);display:inline-block;line-height:1.4}
+.chili{color:var(--seal);font-family:var(--f-hz);font-size:12px;font-weight:900;letter-spacing:-1px}
+.dish-sub{font-size:13px;margin-top:2px}
+.dish-detail{background:var(--paper);border-radius:10px;padding:12px;margin:6px 0 10px;display:flex;flex-direction:column;gap:8px}
+.break{display:flex;flex-wrap:wrap;gap:6px}
+.break span{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:3px 8px;font-size:13px}
+.break .hz{font-size:16px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.phr{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.phr .tx{flex:1;min-width:0}
+.phr .hz{font-size:19px}
+
+/* grammar */
+.glist{display:grid;gap:8px}
+.gitem{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.gitem:hover{border-color:var(--jade)}
+.gitem .hz{font-size:22px;text-align:center;color:var(--jade);line-height:1.2}
+.gitem b{font-size:14px;display:block}
+.gitem small{color:var(--muted)}
+.gitem .mini{width:54px}
+.structure{font-family:var(--f-sc);background:var(--jade-soft);border-radius:10px;padding:10px 12px;font-weight:500}
+.ex{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.ex .tx{flex:1;min-width:0}
+.ex .hz{font-size:20px}
+
+/* chat */
+.chat{display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.msg.w{background:var(--card);border:1px solid var(--line);align-self:flex-start}
+.msg.me{background:var(--jade-soft);align-self:flex-end}
+.msg .hz{font-size:19px}
+.fix{font-size:13px;border-left:3px solid var(--t2);padding-left:8px}
+textarea,input[type=text],select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;width:100%}
+textarea{resize:vertical;min-height:70px}
+.hidden-text{filter:blur(6px);cursor:pointer;user-select:none}
+.note{font-size:13px;background:var(--paper);border-radius:10px;padding:10px 12px}
+.warn{background:var(--seal-soft);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:13px}
+.scan-card{display:flex;flex-direction:column;gap:4px;padding:12px 0;border-bottom:1px solid var(--line)}
+.scan-card .hz{font-size:20px}
+.out{white-space:pre-wrap;font-size:14px}
+label.sw{display:flex;align-items:center;gap:8px;font-size:14px}
+.kbd-hint{font-size:12px;color:var(--muted);text-align:center}
+@media (hover:none){.kbd-hint{display:none}}
+@media (prefers-reduced-motion: no-preference){
+  .opt,.tile,.btn,.mode{transition:border-color .15s,background-color .15s,transform .1s}
+  .tile:active,.opt:active:not([disabled]){transform:scale(.98)}
+  .pulse{animation:pulse 1s ease-in-out infinite}
+  @keyframes pulse{50%{opacity:.6}}
+}
+@media (max-width:420px){.prompt .hzbig{font-size:38px}.hero .big{font-size:46px}}
+</style>
+</head>
+<body>
+
+
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand"><span class="hz">小老师</span><span class="py">xiǎo lǎo shī</span></div>
+    <div class="sync" id="sync"><i class="dot"></i><span>This device</span></div>
+  </header>
+  <main id="main"><div class="card">Loading lessons…</div></main>
+</div>
+<div class="tabbar"><nav id="tabs"></nav></div>
+
+<script>
+/* ===================== CONTENT ===================== */
+/* Pinyin is written syllable by syllable so it can be tone-coloured. */
+
+const RESTAURANT = { zh: "福来小馆", py: "Fú lái xiǎo guǎn", en: "Fulai Bistro (practice menu)" };
+
+/* unit: what the dish is counted in. tag: 招牌 signature / 推荐 recommended / 新 new. spicy 0-3 */
+const MENU = [
+  { sec: "凉菜", secPy: "liáng cài", secEn: "Cold dishes", items: [
+    { zh: "拍黄瓜", py: "pāi huáng guā", en: "Smashed cucumber", p: 18, u: "份", spicy: 0 },
+    { zh: "凉拌木耳", py: "liáng bàn mù ěr", en: "Wood-ear mushroom salad", p: 22, u: "份", spicy: 1 },
+    { zh: "口水鸡", py: "kǒu shuǐ jī", en: "Mouth-watering chicken", p: 38, u: "份", spicy: 2, tag: "推荐", note: "口水 literally means saliva: it's so good your mouth waters. Cold poached chicken in chilli oil." },
+    { zh: "皮蛋豆腐", py: "pí dàn dòu fu", en: "Century egg with tofu", p: 20, u: "份", spicy: 0, note: "皮蛋 is a preserved duck egg with a dark jelly-like white." }
+  ]},
+  { sec: "热菜", secPy: "rè cài", secEn: "Hot dishes", items: [
+    { zh: "宫保鸡丁", py: "gōng bǎo jī dīng", en: "Kung pao chicken", p: 42, u: "份", spicy: 1, tag: "招牌", note: "丁 = diced. Chicken cubes with peanuts and dried chilli." },
+    { zh: "鱼香肉丝", py: "yú xiāng ròu sī", en: "Fish-fragrant pork strips", p: 38, u: "份", spicy: 1, note: "No fish! 鱼香 is a sweet, sour and garlicky Sichuan sauce. 丝 = shredded." },
+    { zh: "麻婆豆腐", py: "má pó dòu fu", en: "Mapo tofu", p: 28, u: "份", spicy: 2, note: "Tofu with minced beef or pork in a numbing (麻) chilli sauce." },
+    { zh: "红烧肉", py: "hóng shāo ròu", en: "Red-braised pork belly", p: 58, u: "份", spicy: 0, tag: "招牌", note: "红烧 = braised in soy sauce and sugar. 肉 alone almost always means pork." },
+    { zh: "糖醋里脊", py: "táng cù lǐ ji", en: "Sweet and sour pork", p: 46, u: "份", spicy: 0 },
+    { zh: "回锅肉", py: "huí guō ròu", en: "Twice-cooked pork", p: 45, u: "份", spicy: 2, note: "回锅 = back into the wok: boiled, sliced, then stir-fried." },
+    { zh: "西红柿炒鸡蛋", py: "xī hóng shì chǎo jī dàn", en: "Tomato and egg stir-fry", p: 26, u: "份", spicy: 0, note: "The classic home-style dish. Safe, cheap, everywhere." },
+    { zh: "地三鲜", py: "dì sān xiān", en: "Potato, eggplant and capsicum", p: 32, u: "份", spicy: 0, note: "Literally 'three fresh things from the earth'. Vegetarian (check for pork fat)." },
+    { zh: "干煸四季豆", py: "gān biān sì jì dòu", en: "Dry-fried green beans", p: 30, u: "份", spicy: 1 },
+    { zh: "清蒸鱼", py: "qīng zhēng yú", en: "Steamed whole fish", p: 88, u: "条", spicy: 0, note: "清蒸 = plain steamed. Often priced 时价 (market price) or by the 斤 (500 g)." },
+    { zh: "水煮牛肉", py: "shuǐ zhǔ niú ròu", en: "Sichuan boiled beef", p: 68, u: "份", spicy: 3, note: "Sounds gentle (water-boiled) but comes swimming in chilli oil." },
+    { zh: "蒜蓉西兰花", py: "suàn róng xī lán huā", en: "Garlic broccoli", p: 26, u: "份", spicy: 0 },
+    { zh: "北京烤鸭", py: "Běi jīng kǎo yā", en: "Peking duck (half)", p: 98, u: "只", spicy: 0, tag: "招牌", note: "Ordered as 半只 (half) or 一只 (whole). Comes with pancakes, cucumber and sauce." }
+  ]},
+  { sec: "汤", secPy: "tāng", secEn: "Soups", items: [
+    { zh: "酸辣汤", py: "suān là tāng", en: "Hot and sour soup", p: 22, u: "碗", spicy: 1 },
+    { zh: "西红柿鸡蛋汤", py: "xī hóng shì jī dàn tāng", en: "Tomato egg drop soup", p: 18, u: "碗", spicy: 0 },
+    { zh: "紫菜蛋花汤", py: "zǐ cài dàn huā tāng", en: "Seaweed egg soup", p: 16, u: "碗", spicy: 0 }
+  ]},
+  { sec: "主食", secPy: "zhǔ shí", secEn: "Rice, noodles and dumplings", items: [
+    { zh: "米饭", py: "mǐ fàn", en: "Steamed rice", p: 3, u: "碗", spicy: 0 },
+    { zh: "蛋炒饭", py: "dàn chǎo fàn", en: "Egg fried rice", p: 18, u: "份", spicy: 0 },
+    { zh: "牛肉面", py: "niú ròu miàn", en: "Beef noodle soup", p: 25, u: "碗", spicy: 1, tag: "推荐" },
+    { zh: "炸酱面", py: "zhá jiàng miàn", en: "Noodles with fried bean sauce", p: 22, u: "碗", spicy: 0 },
+    { zh: "猪肉白菜饺子", py: "zhū ròu bái cài jiǎo zi", en: "Pork and cabbage dumplings", p: 8, u: "两", spicy: 0, note: "Priced per 两 (50 g, about 5 or 6 dumplings). Order 二两 or 三两, or 半斤 (= 5 两)." },
+    { zh: "小笼包", py: "xiǎo lóng bāo", en: "Soup dumplings", p: 26, u: "笼", spicy: 0, note: "Counted by the steamer basket: 一笼 = one basket." },
+    { zh: "葱油饼", py: "cōng yóu bǐng", en: "Spring onion pancake", p: 12, u: "张", spicy: 0 }
+  ]},
+  { sec: "饮料", secPy: "yǐn liào", secEn: "Drinks", items: [
+    { zh: "青岛啤酒", py: "Qīng dǎo pí jiǔ", en: "Tsingtao beer", p: 12, u: "瓶", spicy: 0, note: "Ask for 冰的 (bīng de) if you want it cold. Room temperature is common." },
+    { zh: "可乐", py: "kě lè", en: "Cola", p: 6, u: "瓶", spicy: 0 },
+    { zh: "绿茶", py: "lǜ chá", en: "Green tea (pot)", p: 20, u: "壶", spicy: 0 },
+    { zh: "豆浆", py: "dòu jiāng", en: "Soy milk", p: 5, u: "杯", spicy: 0 },
+    { zh: "矿泉水", py: "kuàng quán shuǐ", en: "Mineral water", p: 4, u: "瓶", spicy: 0 },
+    { zh: "酸梅汤", py: "suān méi tāng", en: "Sour plum drink", p: 8, u: "杯", spicy: 0, note: "Not a soup: a cold sweet-sour plum drink. 汤 can be a drink." }
+  ]}
+];
+
+/* measure words used on menus: zh, pinyin, tone of measure word for 一 sandhi */
+const UNITS = { "份": ["fèn", 4, "portion"], "碗": ["wǎn", 3, "bowl"], "瓶": ["píng", 2, "bottle"], "壶": ["hú", 2, "pot"], "杯": ["bēi", 1, "cup/glass"], "两": ["liǎng", 3, "50 g"], "笼": ["lóng", 2, "steamer"], "只": ["zhī", 1, "(whole bird)"], "条": ["tiáo", 2, "(long thing)"], "张": ["zhāng", 1, "(flat thing)"] };
+
+/* key menu vocabulary. g = group */
+const MENU_WORDS = [
+  ["肉","ròu","meat (usually pork)","protein"],["猪肉","zhū ròu","pork","protein"],["牛肉","niú ròu","beef","protein"],["羊肉","yáng ròu","lamb / mutton","protein"],
+  ["鸡","jī","chicken","protein"],["鸭","yā","duck","protein"],["鱼","yú","fish","protein"],["虾","xiā","prawn / shrimp","protein"],
+  ["蛋","dàn","egg","protein"],["鸡蛋","jī dàn","chicken egg","protein"],["豆腐","dòu fu","tofu","protein"],["排骨","pái gǔ","spare ribs","protein"],
+  ["丁","dīng","diced","cut"],["丝","sī","shredded / strips","cut"],["片","piàn","sliced","cut"],["块","kuài","chunks","cut"],["丸子","wán zi","meatballs","cut"],
+  ["炒","chǎo","stir-fried","method"],["煮","zhǔ","boiled","method"],["蒸","zhēng","steamed","method"],["清蒸","qīng zhēng","plain steamed","method"],["烤","kǎo","roasted / grilled","method"],
+  ["炸","zhá","deep-fried","method"],["红烧","hóng shāo","red-braised (soy)","method"],["煎","jiān","pan-fried","method"],["凉拌","liáng bàn","cold, dressed","method"],
+  ["干煸","gān biān","dry-fried","method"],["炖","dùn","stewed","method"],["拍","pāi","smashed","method"],
+  ["辣","là","spicy (chilli hot)","flavour"],["麻","má","numbing (Sichuan pepper)","flavour"],["酸","suān","sour","flavour"],["甜","tián","sweet","flavour"],
+  ["咸","xián","salty","flavour"],["香","xiāng","fragrant","flavour"],["糖醋","táng cù","sweet and sour","flavour"],["蒜蓉","suàn róng","minced garlic","flavour"],
+  ["葱","cōng","spring onion","flavour"],["酱","jiàng","sauce / paste","flavour"],["鱼香","yú xiāng","fish-fragrant sauce (no fish)","flavour"],
+  ["菜","cài","dish / vegetable","veg"],["白菜","bái cài","Chinese cabbage","veg"],["土豆","tǔ dòu","potato","veg"],["茄子","qié zi","eggplant","veg"],
+  ["黄瓜","huáng guā","cucumber","veg"],["西红柿","xī hóng shì","tomato","veg"],["木耳","mù ěr","wood-ear mushroom","veg"],["西兰花","xī lán huā","broccoli","veg"],
+  ["四季豆","sì jì dòu","green beans","veg"],["紫菜","zǐ cài","seaweed","veg"],["香菜","xiāng cài","coriander","veg"],
+  ["饭","fàn","rice / meal","staple"],["米饭","mǐ fàn","steamed rice","staple"],["炒饭","chǎo fàn","fried rice","staple"],["面","miàn","noodles","staple"],
+  ["饺子","jiǎo zi","dumplings","staple"],["包","bāo","bun","staple"],["饼","bǐng","flatbread / pancake","staple"],["粥","zhōu","congee (rice porridge)","staple"],["汤","tāng","soup","staple"],
+  ["茶","chá","tea","drink"],["水","shuǐ","water","drink"],["啤酒","pí jiǔ","beer","drink"],["果汁","guǒ zhī","juice","drink"],["冰","bīng","ice / iced","drink"],["豆浆","dòu jiāng","soy milk","drink"],
+  ["凉菜","liáng cài","cold dishes","menu"],["热菜","rè cài","hot dishes","menu"],["主食","zhǔ shí","staples (rice, noodles)","menu"],["饮料","yǐn liào","drinks","menu"],
+  ["招牌","zhāo pái","signature dish","menu"],["推荐","tuī jiàn","recommended","menu"],["特价","tè jià","special price","menu"],["时价","shí jià","market price","menu"],
+  ["小份","xiǎo fèn","small portion","menu"],["半只","bàn zhī","half (bird)","menu"],["元","yuán","yuan (¥)","menu"],["斤","jīn","500 grams","menu"],
+  ["京","jīng","Beijing-style","menu"],["川","chuān","Sichuan-style","menu"],["家常","jiā cháng","home-style","menu"],["素","sù","vegetarian","menu"]
+];
+
+/* measure words in ordering contexts */
+const MEASURES = [
+  { q: "来两___米饭", py: "lái liǎng wǎn mǐ fàn", en: "Two bowls of rice", a: "碗", o: ["碗","个","张","本"], why: "Rice is served by the bowl: 碗 wǎn." },
+  { q: "来一___青岛啤酒", py: "lái yì píng Qīng dǎo pí jiǔ", en: "A bottle of Tsingtao", a: "瓶", o: ["瓶","本","只","条"], why: "瓶 píng = bottle. A glass would be 杯 bēi." },
+  { q: "我要一___咖啡", py: "wǒ yào yì bēi kā fēi", en: "I'd like a coffee", a: "杯", o: ["杯","碗","条","张"], why: "Drinks in a cup or glass take 杯 bēi." },
+  { q: "来三___饺子", py: "lái sān liǎng jiǎo zi", en: "150 g of dumplings", a: "两", o: ["两","本","只","件"], why: "In the north dumplings are sold by weight: 两 liǎng = 50 g, about 5 or 6 dumplings." },
+  { q: "来一___小笼包", py: "lái yì lóng xiǎo lóng bāo", en: "A basket of soup dumplings", a: "笼", o: ["笼","张","条","本"], why: "Counted by the steamer basket, 笼 lóng." },
+  { q: "一___清蒸鱼", py: "yì tiáo qīng zhēng yú", en: "A steamed fish", a: "条", o: ["条","只","张","本"], why: "Fish are long and thin, so 条 tiáo." },
+  { q: "来半___烤鸭", py: "lái bàn zhī kǎo yā", en: "Half a roast duck", a: "只", o: ["只","条","张","杯"], why: "Birds and most animals take 只 zhī." },
+  { q: "再来一___青菜", py: "zài lái yì pán qīng cài", en: "Another plate of greens", a: "盘", o: ["盘","本","条","只"], why: "盘 pán = a plate of. 份 fèn (a portion) also works." },
+  { q: "请给我一___筷子", py: "qǐng gěi wǒ yì shuāng kuài zi", en: "A pair of chopsticks, please", a: "双", o: ["双","个","条","张"], why: "Pairs take 双 shuāng: chopsticks, shoes, socks." },
+  { q: "来一___绿茶", py: "lái yì hú lǜ chá", en: "A pot of green tea", a: "壶", o: ["壶","本","只","条"], why: "A teapot's worth is 壶 hú." },
+  { q: "可以给我一___菜单吗？", py: "kě yǐ gěi wǒ yí fèn cài dān ma", en: "Could I have a menu?", a: "份", o: ["份","杯","只","碗"], why: "Menus take 份 fèn (a copy). 本 běn works for a booklet menu, 张 zhāng for a single sheet." },
+  { q: "两___酸辣汤", py: "liǎng wǎn suān là tāng", en: "Two bowls of hot and sour soup", a: "碗", o: ["碗","条","本","张"], why: "Soup by the bowl, 碗 wǎn. A big shared pot is 份 fèn." },
+  { q: "我们三___", py: "wǒ men sān wèi", en: "There are three of us", a: "位", o: ["位","只","本","杯"], why: "位 wèi is the polite measure word for people. Waiters ask 几位？" },
+  { q: "来十___羊肉串", py: "lái shí chuàn yáng ròu chuàn", en: "Ten lamb skewers", a: "串", o: ["串","张","本","件"], why: "串 chuàn = a skewer. It's both the noun and the measure word." },
+  { q: "两___包子", py: "liǎng gè bāo zi", en: "Two steamed buns", a: "个", o: ["个","条","张","本"], why: "Individual buns use the general measure word 个." },
+  { q: "一___葱油饼", py: "yì zhāng cōng yóu bǐng", en: "One spring onion pancake", a: "张", o: ["张","条","本","杯"], why: "Flat things take 张 zhāng: pancakes, tickets, tables, paper." },
+  { q: "来一___矿泉水", py: "lái yì píng kuàng quán shuǐ", en: "A bottle of mineral water", a: "瓶", o: ["瓶","碗","张","只"], why: "Bottled water, 瓶 píng." },
+  { q: "请给我一___热水", py: "qǐng gěi wǒ yì bēi rè shuǐ", en: "A glass of hot water, please", a: "杯", o: ["杯","本","只","张"], why: "Hot water is a normal thing to ask for in China. 杯 for a glass." }
+];
+
+/* waiter dialogues: w = waiter line; o = reply options, first is correct */
+const DIALOGUES = [
+  { id: "seat", title: "Getting seated and ordering", zh: "点菜", steps: [
+    { w: "欢迎光临！几位？", py: "huān yíng guāng lín! jǐ wèi?", en: "Welcome! How many people?",
+      o: [["两位。","liǎng wèi.","Two.",""],["两只。","liǎng zhī.","Two (animals).","只 is for animals. People take 位 (polite) or 个."],["我是两。","wǒ shì liǎng.","I am two.","是 links nouns. You just answer the number + 位."]] },
+    { w: "这边请。这是菜单。", py: "zhè biān qǐng. zhè shì cài dān.", en: "This way please. Here's the menu.",
+      o: [["谢谢。","xiè xie.","Thank you.",""],["不客气。","bú kè qi.","You're welcome.","不客气 answers a thank-you. Here you're the one thanking."],["对不起。","duì bu qǐ.","Sorry.","Nothing to apologise for here."]] },
+    { w: "想吃点儿什么？", py: "xiǎng chī diǎnr shén me?", en: "What would you like to eat?",
+      o: [["我要一个宫保鸡丁。","wǒ yào yí ge gōng bǎo jī dīng.","I'll have a kung pao chicken.",""],["我宫保鸡丁要一个。","wǒ gōng bǎo jī dīng yào yí ge.","(wrong order)","Order is Subject + Verb + number/measure + Object."],["我要宫保鸡丁一个了。","wǒ yào gōng bǎo jī dīng yí ge le.","(wrong order + 了)","The number goes before the noun, and 了 would mean it already happened."]] },
+    { w: "要米饭吗？", py: "yào mǐ fàn ma?", en: "Would you like rice?",
+      o: [["要两碗米饭。","yào liǎng wǎn mǐ fàn.","Two bowls of rice.",""],["要二碗米饭。","yào èr wǎn mǐ fàn.","(二 before a measure word)","Before a measure word, 2 is 两 liǎng, not 二 èr."],["要两米饭。","yào liǎng mǐ fàn.","(no measure word)","A number needs a measure word: 两碗米饭."]] },
+    { w: "喝点儿什么？", py: "hē diǎnr shén me?", en: "Anything to drink?",
+      o: [["来一瓶啤酒，要冰的。","lái yì píng pí jiǔ, yào bīng de.","A beer, a cold one.",""],["来一瓶啤酒，要冰。","lái yì píng pí jiǔ, yào bīng.","A beer, I want ice.","要冰 = I want ice. 冰的 = a cold one. The 的 matters."],["我喝了一瓶啤酒。","wǒ hē le yì píng pí jiǔ.","I drank a beer.","了 makes it past: you already drank one."]] },
+    { w: "好的。还要别的吗？", py: "hǎo de. hái yào bié de ma?", en: "OK. Anything else?",
+      o: [["不要了，谢谢。","bú yào le, xiè xie.","That's all, thanks.",""],["没有了要。","méi yǒu le yào.","(scrambled)","Say 不要了 (no more) or 没有了 (that's it)."],["不要吗。","bú yào ma.","Don't want?","吗 turns it into a question."]] }
+  ]},
+  { id: "request", title: "Special requests", zh: "要求", steps: [
+    { w: "这个菜有点儿辣，可以吗？", py: "zhè ge cài yǒu diǎnr là, kě yǐ ma?", en: "This dish is a bit spicy, is that OK?",
+      o: [["可以少放一点儿辣椒吗？","kě yǐ shǎo fàng yì diǎnr là jiāo ma?","Can you use less chilli?",""],["可以有点儿少辣吗？","kě yǐ yǒu diǎnr shǎo là ma?","(有点儿 misused)","有点儿 goes before adjectives to complain. For 'a bit less', use 少…一点儿."],["我不辣。","wǒ bú là.","I am not spicy.","This says you aren't spicy. Try 我不吃辣 or 不要辣."]] },
+    { w: "你们有什么不吃的吗？", py: "nǐ men yǒu shén me bù chī de ma?", en: "Is there anything you don't eat?",
+      o: [["我不吃香菜。","wǒ bù chī xiāng cài.","I don't eat coriander.",""],["我没吃香菜。","wǒ méi chī xiāng cài.","I didn't eat coriander.","没 is for the past. Habits take 不."],["我不吃了香菜。","wǒ bù chī le xiāng cài.","(了 in the wrong place)","了 doesn't go after a negated verb like this."]] },
+    { w: "这个菜要等二十分钟。", py: "zhè ge cài yào děng èr shí fēn zhōng.", en: "This dish takes twenty minutes.",
+      o: [["没关系，我们不着急。","méi guān xi, wǒ men bù zháo jí.","No problem, we're not in a hurry.",""],["没关系，我们很着急。","méi guān xi, wǒ men hěn zháo jí.","No problem, we're in a big hurry.","That contradicts itself."],["二十分钟太快了。","èr shí fēn zhōng tài kuài le.","Twenty minutes is too fast.","Probably not what you mean."]] },
+    { w: "菜齐了，请慢用。", py: "cài qí le, qǐng màn yòng.", en: "That's everything. Enjoy your meal.",
+      o: [["服务员，再来一碗米饭。","fú wù yuán, zài lái yì wǎn mǐ fàn.","Excuse me, another bowl of rice.",""],["服务员，又来一碗米饭。","fú wù yuán, yòu lái yì wǎn mǐ fàn.","(又 for a future repeat)","又 is for a repeat that already happened. Requests use 再."],["服务员，一碗再米饭。","fú wù yuán, yì wǎn zài mǐ fàn.","(再 in the wrong place)","再 goes before the verb: 再来一碗."]] }
+  ]},
+  { id: "pay", title: "Paying and leaving", zh: "买单", steps: [
+    { w: "您好，需要什么？", py: "nín hǎo, xū yào shén me?", en: "Hello, what can I get you?",
+      o: [["买单！","mǎi dān!","The bill, please!",""],["买菜！","mǎi cài!","Buy groceries!","买菜 is shopping for vegetables."],["卖单！","mài dān!","Sell the bill!","卖 mài (sell) vs 买 mǎi (buy): the tone matters."]] },
+    { w: "一共一百二十八块。", py: "yí gòng yì bǎi èr shí bā kuài.", en: "That's 128 yuan altogether.",
+      o: [["可以用微信付吗？","kě yǐ yòng Wēi xìn fù ma?","Can I pay with WeChat?",""],["可以用微信付了吗？","kě yǐ yòng Wēi xìn fù le ma?","(stray 了)","了 here sounds like 'is it now possible…'. Drop it."],["微信可以吗付？","Wēi xìn kě yǐ ma fù?","(吗 in the middle)","吗 always goes at the end of the sentence."]] },
+    { w: "可以，扫这个码。", py: "kě yǐ, sǎo zhè ge mǎ.", en: "Sure, scan this code.",
+      o: [["好的。剩下的菜可以打包吗？","hǎo de. shèng xià de cài kě yǐ dǎ bāo ma?","OK. Can we take the leftovers?",""],["好的。剩下的菜可以打吗？","hǎo de. shèng xià de cài kě yǐ dǎ ma?","Can we hit the leftovers?","打 alone means hit. 打包 = pack to take away."],["好的。打包剩下的菜可以吗了？","hǎo de. dǎ bāo shèng xià de cài kě yǐ ma le?","(stray 了)","Nothing goes after 吗."]] },
+    { w: "没问题，我给您拿个盒子。", py: "méi wèn tí, wǒ gěi nín ná ge hé zi.", en: "No problem, I'll get you a box.",
+      o: [["谢谢，菜很好吃！","xiè xie, cài hěn hǎo chī!","Thanks, the food was great!",""],["谢谢，菜很好喝！","xiè xie, cài hěn hǎo hē!","Thanks, the food was good to drink!","好喝 is for drinks. Food is 好吃."],["谢谢，菜是好吃。","xiè xie, cài shì hǎo chī.","(是 + adjective)","Adjectives don't take 是. Use 很 instead."]] }
+  ]}
+];
+
+const PHRASES = [
+  { g: "Getting a table", list: [
+    ["服务员！","fú wù yuán!","Excuse me! (calling staff)"],["我们三位。","wǒ men sān wèi.","There are three of us."],["有位子吗？","yǒu wèi zi ma?","Any free seats?"],["请给我菜单。","qǐng gěi wǒ cài dān.","The menu, please."],["有英文菜单吗？","yǒu Yīng wén cài dān ma?","Do you have an English menu?"],["可以扫码点菜吗？","kě yǐ sǎo mǎ diǎn cài ma?","Can we order by scanning the QR code?"]]},
+  { g: "Asking about dishes", list: [
+    ["你们的招牌菜是什么？","nǐ men de zhāo pái cài shì shén me?","What's your signature dish?"],["你推荐什么？","nǐ tuī jiàn shén me?","What do you recommend?"],["这个是什么？","zhè ge shì shén me?","What's this? (pointing)"],["这个辣不辣？","zhè ge là bu là?","Is this spicy?"],["这个菜里有肉吗？","zhè ge cài li yǒu ròu ma?","Is there meat in this?"],["一份够两个人吃吗？","yí fèn gòu liǎng ge rén chī ma?","Is one portion enough for two?"]]},
+  { g: "Ordering", list: [
+    ["我要这个。","wǒ yào zhè ge.","I'll have this."],["来一份宫保鸡丁。","lái yí fèn gōng bǎo jī dīng.","A kung pao chicken, please."],["来两碗米饭。","lái liǎng wǎn mǐ fàn.","Two bowls of rice."],["先点这些。","xiān diǎn zhè xiē.","That's all for now."],["再来一瓶啤酒。","zài lái yì píng pí jiǔ.","Another beer."],["要冰的。","yào bīng de.","A cold one."]]},
+  { g: "Special requests", list: [
+    ["不要辣。","bú yào là.","No chilli."],["微辣。","wēi là.","Mildly spicy."],["少放点儿辣椒。","shǎo fàng diǎnr là jiāo.","Go easy on the chilli."],["不要香菜。","bú yào xiāng cài.","No coriander."],["我不吃猪肉。","wǒ bù chī zhū ròu.","I don't eat pork."],["我吃素。","wǒ chī sù.","I'm vegetarian."],["请给我一杯热水。","qǐng gěi wǒ yì bēi rè shuǐ.","A glass of hot water, please."],["请给我一双筷子。","qǐng gěi wǒ yì shuāng kuài zi.","A pair of chopsticks, please."]]},
+  { g: "Paying", list: [
+    ["买单！","mǎi dān!","The bill, please!"],["一共多少钱？","yí gòng duō shao qián?","How much altogether?"],["可以刷卡吗？","kě yǐ shuā kǎ ma?","Can I pay by card?"],["可以用支付宝吗？","kě yǐ yòng Zhī fù bǎo ma?","Can I use Alipay?"],["我扫你。","wǒ sǎo nǐ.","I'll scan your code."],["请打包。","qǐng dǎ bāo.","Please pack this to go."],["太好吃了！","tài hǎo chī le!","That was delicious!"]]}
+];
+
+/* listening sentences: zh = space-separated words (punctuation as its own token) */
+const LISTEN = [
+  ["我 想 喝 一 杯 咖啡","wǒ xiǎng hē yì bēi kā fēi","I'd like a cup of coffee."],
+  ["这个 多少 钱 ？","zhè ge duō shao qián?","How much is this?"],
+  ["太 贵 了 ， 可以 便宜 一点儿 吗 ？","tài guì le, kě yǐ pián yi yì diǎnr ma?","Too expensive. Can you make it a bit cheaper?"],
+  ["洗手间 在 哪儿 ？","xǐ shǒu jiān zài nǎr?","Where's the bathroom?"],
+  ["我 昨天 去 了 长城","wǒ zuó tiān qù le Cháng chéng","I went to the Great Wall yesterday."],
+  ["你 吃 过 北京 烤鸭 吗 ？","nǐ chī guo Běi jīng kǎo yā ma?","Have you ever had Peking duck?"],
+  ["今天 比 昨天 冷","jīn tiān bǐ zuó tiān lěng","Today is colder than yesterday."],
+  ["我 在 中国 的 时候 学 了 一点儿 中文","wǒ zài Zhōng guó de shí hou xué le yì diǎnr Zhōng wén","When I was in China I learned a little Chinese."],
+  ["你 能 说 慢 一点儿 吗 ？","nǐ néng shuō màn yì diǎnr ma?","Could you speak a little slower?"],
+  ["对不起 ， 我 听 不 懂","duì bu qǐ, wǒ tīng bu dǒng","Sorry, I don't understand."],
+  ["火车站 离 这儿 远 吗 ？","huǒ chē zhàn lí zhèr yuǎn ma?","Is the train station far from here?"],
+  ["我们 坐 地铁 去 吧","wǒ men zuò dì tiě qù ba","Let's take the subway."],
+  ["他 正在 打 电话","tā zhèng zài dǎ diàn huà","He's on the phone right now."],
+  ["我 已经 吃 饱 了","wǒ yǐ jīng chī bǎo le","I'm already full."],
+  ["下雨 了 ， 我们 别 出去 了","xià yǔ le, wǒ men bié chū qu le","It's raining. Let's not go out."],
+  ["你 是 什么 时候 来 的 ？","nǐ shì shén me shí hou lái de?","When did you get here?"],
+  ["我 是 坐 飞机 来 的","wǒ shì zuò fēi jī lái de","I came by plane."],
+  ["这 家 饭馆 的 菜 很 好吃","zhè jiā fàn guǎn de cài hěn hǎo chī","The food at this restaurant is delicious."],
+  ["我 不 吃 辣 的","wǒ bù chī là de","I don't eat spicy food."],
+  ["请 给 我 一 瓶 水","qǐng gěi wǒ yì píng shuǐ","Please give me a bottle of water."],
+  ["你 要 冰 的 还是 热 的 ？","nǐ yào bīng de hái shi rè de?","Do you want it cold or hot?"],
+  ["我 有点儿 累","wǒ yǒu diǎnr lèi","I'm a bit tired."],
+  ["明天 我 就要 去 上海 了","míng tiān wǒ jiù yào qù Shàng hǎi le","I'm off to Shanghai tomorrow."],
+  ["我 一边 吃 饭 一边 看 手机","wǒ yì biān chī fàn yì biān kàn shǒu jī","I look at my phone while I eat."],
+  ["因为 下雨 ， 所以 我 没 去","yīn wèi xià yǔ, suǒ yǐ wǒ méi qù","It rained, so I didn't go."],
+  ["虽然 很 贵 ， 但是 很 好吃","suī rán hěn guì, dàn shì hěn hǎo chī","It's expensive, but it's delicious."],
+  ["我 会 说 一点儿 中文","wǒ huì shuō yì diǎnr Zhōng wén","I can speak a little Chinese."],
+  ["这儿 可以 刷卡 吗 ？","zhèr kě yǐ shuā kǎ ma?","Can I pay by card here?"],
+  ["我 用 微信 付 钱","wǒ yòng Wēi xìn fù qián","I'll pay with WeChat."],
+  ["你 等 我 一下","nǐ děng wǒ yí xià","Wait for me a moment."],
+  ["我们 几 点 见面 ？","wǒ men jǐ diǎn jiàn miàn?","What time shall we meet?"],
+  ["电影 七 点 半 开始","diàn yǐng qī diǎn bàn kāi shǐ","The film starts at half past seven."],
+  ["我 住 在 澳大利亚","wǒ zhù zài Ào dà lì yà","I live in Australia."],
+  ["他 跑 得 很 快","tā pǎo de hěn kuài","He runs fast."],
+  ["你 汉字 写 得 很 好","nǐ Hàn zì xiě de hěn hǎo","You write characters really well."],
+  ["我 把 护照 忘 在 酒店 了","wǒ bǎ hù zhào wàng zài jiǔ diàn le","I left my passport at the hotel."],
+  ["请问 ， 去 机场 怎么 走 ？","qǐng wèn, qù jī chǎng zěn me zǒu?","Excuse me, how do I get to the airport?"],
+  ["一直 往 前 走 ， 然后 左 拐","yì zhí wǎng qián zǒu, rán hòu zuǒ guǎi","Go straight ahead, then turn left."],
+  ["我 没 去 过 西安","wǒ méi qù guo Xī ān","I've never been to Xi'an."],
+  ["有 大 一点儿 的 吗 ？","yǒu dà yì diǎnr de ma?","Do you have a bigger one?"],
+  ["我 觉得 中文 不 太 难","wǒ jué de Zhōng wén bú tài nán","I don't think Chinese is too hard."],
+  ["你 吃 早饭 了 吗 ？","nǐ chī zǎo fàn le ma?","Have you had breakfast?"],
+  ["还 没 吃 呢","hái méi chī ne","Not yet."],
+  ["我们 一起 去 吃 火锅 吧","wǒ men yì qǐ qù chī huǒ guō ba","Let's go for hotpot together."],
+  ["外面 太 热 了","wài miàn tài rè le","It's too hot outside."],
+  ["我 每天 早上 跑步","wǒ měi tiān zǎo shang pǎo bù","I go running every morning."],
+  ["他 比 我 高 一点儿","tā bǐ wǒ gāo yì diǎnr","He's a little taller than me."],
+  ["你 的 中文 越来越 好 了","nǐ de Zhōng wén yuè lái yuè hǎo le","Your Chinese keeps getting better."],
+  ["菜 马上 就 好","cài mǎ shàng jiù hǎo","The food will be ready right away."],
+  ["我们 的 菜 还 没 来","wǒ men de cài hái méi lái","Our food hasn't come yet."],
+  ["这个 菜 是 用 什么 做 的 ？","zhè ge cài shì yòng shén me zuò de?","What is this dish made with?"],
+  ["你们 几 点 关门 ？","nǐ men jǐ diǎn guān mén?","What time do you close?"]
+];
+
+/* tone words: zh, py (syllable-spaced), en */
+const TONE_WORDS = [
+  ["咖啡","kā fēi","coffee"],["中国","Zhōng guó","China"],["喝茶","hē chá","drink tea"],["飞机","fēi jī","plane"],["今天","jīn tiān","today"],
+  ["牛奶","niú nǎi","milk"],["米饭","mǐ fàn","rice"],["老师","lǎo shī","teacher"],["苹果","píng guǒ","apple"],["电影","diàn yǐng","film"],
+  ["火车","huǒ chē","train"],["汽车","qì chē","car"],["手机","shǒu jī","phone"],["晚上","wǎn shang","evening"],["明天","míng tiān","tomorrow"],
+  ["昨天","zuó tiān","yesterday"],["水果","shuǐ guǒ","fruit"],["你好","nǐ hǎo","hello"],["可以","kě yǐ","can, may"],["饭馆","fàn guǎn","restaurant"],
+  ["面条","miàn tiáo","noodles"],["鸡蛋","jī dàn","egg"],["豆腐","dòu fu","tofu"],["啤酒","pí jiǔ","beer"],["菜单","cài dān","menu"],
+  ["好吃","hǎo chī","tasty"],["便宜","pián yi","cheap"],["买单","mǎi dān","pay the bill"],["打包","dǎ bāo","take away"],["机场","jī chǎng","airport"],
+  ["地铁","dì tiě","subway"],["学习","xué xí","study"],["回来","huí lái","come back"],["汉字","Hàn zì","characters"],["再见","zài jiàn","goodbye"],
+  ["饺子","jiǎo zi","dumplings"],["包子","bāo zi","steamed bun"],["烤鸭","kǎo yā","roast duck"],["火锅","huǒ guō","hotpot"],["酸辣","suān là","hot and sour"],
+  ["红茶","hóng chá","black tea"],["绿茶","lǜ chá","green tea"],["冰水","bīng shuǐ","iced water"],["筷子","kuài zi","chopsticks"],["银行","yín háng","bank"],
+  ["酒店","jiǔ diàn","hotel"],["商店","shāng diàn","shop"],["买菜","mǎi cài","buy groceries"],["卖菜","mài cài","sell vegetables"],["汤面","tāng miàn","noodle soup"]
+];
+
+/* grammar patterns.
+   ex: [zh words, pinyin, english]
+   d: drills. {t:"fill", q, o:[correct first...], why}  or {t:"order", zh, en} */
+const GRAMMAR = [
+ { id:"le", hsk:2, name:"了 completed action", zh:"了", s:"Verb + 了 + number / measure + object",
+   x:"了 after a verb marks the action as done. It sounds complete when something follows the object (a number, a measure word, another clause): 我买了书 feels unfinished, 我买了一本书 is fine. Negate with 没 and drop the 了: 我没买.",
+   ex:[["我 买 了 一 本 书","wǒ mǎi le yì běn shū","I bought a book."],["我 昨天 喝 了 三 杯 咖啡","wǒ zuó tiān hē le sān bēi kā fēi","I had three coffees yesterday."],["他 没 来","tā méi lái","He didn't come."]],
+   d:[{t:"fill",q:"我昨天___去超市。",o:["没","不","没了","了没"],why:"Past negation is 没 + verb, and 了 drops out."},
+      {t:"fill",q:"我们吃___饭就去看电影。",o:["了","过","着","的"],why:"V了…就… = once X is done, then Y."},
+      {t:"order",zh:"我 喝 了 两 瓶 水",en:"I drank two bottles of water."},
+      {t:"order",zh:"他 买 了 一 张 火车票",en:"He bought a train ticket."}]},
+ { id:"le2", hsk:2, name:"了 change of state", zh:"了", s:"… + 了 (end of sentence)",
+   x:"了 at the end of a sentence says the situation is new: something is true now that wasn't before. 不…了 means 'not any more'.",
+   ex:[["下雨 了","xià yǔ le","It's started to rain."],["我 不 饿 了","wǒ bú è le","I'm not hungry any more."],["他 二十五 岁 了","tā èr shí wǔ suì le","He's 25 now."]],
+   d:[{t:"fill",q:"我吃饱___，不要了。",o:["了","过","的","吗"],why:"吃饱了 = I'm full now (a new state)."},
+      {t:"fill",q:"我以前喝酒，现在不喝___。",o:["了","过","着","呢"],why:"不…了 = no longer."},
+      {t:"order",zh:"天气 冷 了",en:"The weather has turned cold."},
+      {t:"order",zh:"我 会 说 中文 了",en:"I can speak Chinese now."}]},
+ { id:"guo", hsk:2, name:"过 experience", zh:"过", s:"Verb + 过 (+ object)",
+   x:"过 says you've had the experience at some time. Negate with 没 + verb + 过 and keep the 过: 我没去过.",
+   ex:[["我 去 过 北京","wǒ qù guo Běi jīng","I've been to Beijing."],["你 吃 过 火锅 吗 ？","nǐ chī guo huǒ guō ma?","Have you ever had hotpot?"],["我 没 看 过 这 个 电影","wǒ méi kàn guo zhè ge diàn yǐng","I've never seen this film."]],
+   d:[{t:"fill",q:"我没去___上海。",o:["过","了","着","的"],why:"没 + V + 过 = never have. 了 disappears with 没, 过 stays."},
+      {t:"fill",q:"你吃过北京烤鸭___？",o:["吗","了","过","的"],why:"A yes/no question ends with 吗."},
+      {t:"order",zh:"我 学 过 一点儿 中文",en:"I've studied a little Chinese."},
+      {t:"order",zh:"他 没 来 过 澳大利亚",en:"He has never been to Australia."}]},
+ { id:"bi", hsk:2, name:"比 comparisons", zh:"比", s:"A + 比 + B + adjective (+ 一点儿 / 多了 / amount)",
+   x:"比 compares A with B. Don't put 很 or 非常 before the adjective. Show the degree after it instead: 一点儿 (a bit), 多了 (much), or a number.",
+   ex:[["今天 比 昨天 热","jīn tiān bǐ zuó tiān rè","Today is hotter than yesterday."],["他 比 我 大 三 岁","tā bǐ wǒ dà sān suì","He's three years older than me."],["这 家 比 那 家 便宜 多 了","zhè jiā bǐ nà jiā pián yi duō le","This place is much cheaper than that one."]],
+   d:[{t:"fill",q:"茶比咖啡___。",o:["便宜一点儿","很便宜","一点儿便宜","非常便宜"],why:"No 很 or 非常 with 比. 一点儿 goes after the adjective."},
+      {t:"fill",q:"北京比悉尼冷___。",o:["多了","很","太","非常"],why:"Adj + 多了 = much more so."},
+      {t:"order",zh:"我 的 中文 比 以前 好",en:"My Chinese is better than before."},
+      {t:"order",zh:"坐 地铁 比 打车 快",en:"The subway is faster than a taxi."}]},
+ { id:"meiyou", hsk:2, name:"没有 not as … as", zh:"没有", s:"A + 没有 + B + (那么) + adjective",
+   x:"To say A is not as … as B, use 没有. 不比 exists but means 'no more … than' and can sound argumentative; 没有 is the everyday choice.",
+   ex:[["我 没有 他 高","wǒ méi yǒu tā gāo","I'm not as tall as him."],["上海 没有 北京 那么 冷","Shàng hǎi méi yǒu Běi jīng nà me lěng","Shanghai isn't as cold as Beijing."],["这个 菜 没有 那个 辣","zhè ge cài méi yǒu nà ge là","This dish isn't as spicy as that one."]],
+   d:[{t:"fill",q:"我的中文___你的好。",o:["没有","比不","不比较","没"],why:"A 没有 B + adj = A is not as … as B."},
+      {t:"fill",q:"地铁没有出租车___快。",o:["那么","很","多了","比"],why:"那么 (that) is optional but natural; 很 never goes in a comparison."},
+      {t:"order",zh:"今天 没有 昨天 热",en:"Today isn't as hot as yesterday."},
+      {t:"order",zh:"啤酒 没有 白酒 那么 贵",en:"Beer isn't as expensive as baijiu."}]},
+ { id:"shihou", hsk:2, name:"的时候 when / while", zh:"的时候", s:"[clause] + 的时候, main clause",
+   x:"…的时候 means 'when / while …'. The time clause comes first and the main event second, the reverse of English 'I learned Chinese when I was in China'.",
+   ex:[["我 在 中国 的 时候 学 了 中文","wǒ zài Zhōng guó de shí hou xué le Zhōng wén","When I was in China I studied Chinese."],["吃饭 的 时候 别 看 手机","chī fàn de shí hou bié kàn shǒu jī","Don't look at your phone while eating."],["你 有 时间 的 时候 给 我 打 电话","nǐ yǒu shí jiān de shí hou gěi wǒ dǎ diàn huà","Call me when you have time."]],
+   d:[{t:"fill",q:"我睡觉___，他在看电视。",o:["的时候","时候的","以后的","的时"],why:"Clause + 的时候."},
+      {t:"fill",q:"___的时候，他正在吃饭。",o:["我到他家","到我他家","他家我到","我他家到"],why:"Inside the 的时候 clause, normal word order: subject + verb + place."},
+      {t:"order",zh:"我 去 中国 的 时候 买 了 很 多 茶",en:"When I went to China I bought lots of tea."},
+      {t:"order",zh:"你 不 懂 的 时候 可以 问 我",en:"When you don't understand, you can ask me."}]},
+ { id:"zai", hsk:2, name:"在 / 正在 in progress", zh:"正在", s:"(正)在 + verb (+ 呢)",
+   x:"在 or 正在 before a verb means the action is happening now. 呢 at the end adds the same feel and is very common in speech. Negate with 没在.",
+   ex:[["我 在 吃 饭 呢","wǒ zài chī fàn ne","I'm eating."],["他 正在 开会","tā zhèng zài kāi huì","He's in a meeting right now."],["你 在 做 什么 ？","nǐ zài zuò shén me?","What are you doing?"]],
+   d:[{t:"fill",q:"别打电话，他___睡觉呢。",o:["正在","了","过","要"],why:"正在 + verb (+ 呢) = in the middle of doing it."},
+      {t:"fill",q:"我们在等你___。",o:["呢","了","过","吗"],why:"呢 at the end reinforces an ongoing action."},
+      {t:"order",zh:"妈妈 正在 做 饭",en:"Mum is cooking right now."},
+      {t:"order",zh:"外面 在 下雨 呢",en:"It's raining outside."}]},
+ { id:"yaole", hsk:2, name:"要…了 about to", zh:"快要…了", s:"(快 / 就)要 + verb + 了",
+   x:"要…了 says something is about to happen. 快要…了 = very soon. 就要…了 can take a time word (明天就要走了); 快要 can't.",
+   ex:[["火车 要 开 了","huǒ chē yào kāi le","The train is about to leave."],["快要 下雨 了","kuài yào xià yǔ le","It's about to rain."],["我 下 个 星期 就要 回 国 了","wǒ xià ge xīng qī jiù yào huí guó le","I'm going home next week."]],
+   d:[{t:"fill",q:"电影快要开始___，我们快走吧。",o:["了","过","着","的"],why:"快要…了 needs the closing 了."},
+      {t:"fill",q:"他明天___走了。",o:["就要","快要","正在","已经"],why:"With a time word like 明天 use 就要, not 快要."},
+      {t:"order",zh:"饭馆 快要 关门 了",en:"The restaurant is about to close."},
+      {t:"order",zh:"我 的 手机 要 没 电 了",en:"My phone is about to die."}]},
+ { id:"shide", hsk:2, name:"是…的 the details", zh:"是…的", s:"是 + [when / where / how] + verb + 的",
+   x:"For something that already happened, 是…的 puts the spotlight on when, where, how or with whom. Everyone knows it happened; you're giving the detail. 是 is often dropped in speech, 的 never is.",
+   ex:[["我 是 昨天 到 的","wǒ shì zuó tiān dào de","I arrived yesterday."],["你 是 怎么 来 的 ？","nǐ shì zěn me lái de?","How did you get here?"],["我们 是 在 上海 认识 的","wǒ men shì zài Shàng hǎi rèn shi de","We met in Shanghai."]],
+   d:[{t:"fill",q:"我是坐火车来___。",o:["的","了","过","吗"],why:"是…的 frame: 是 + how + verb + 的."},
+      {t:"fill",q:"你___什么时候来中国的？",o:["是","在","了","要"],why:"Asking for the detail of a past event: 是…的."},
+      {t:"order",zh:"他 是 一 个 人 来 的",en:"He came by himself."},
+      {t:"order",zh:"这 本 书 是 在 北京 买 的",en:"This book was bought in Beijing."}]},
+ { id:"de", hsk:2, name:"得 how well", zh:"得", s:"Verb + 得 + (很) adjective · (Verb) + object + verb + 得 + adj",
+   x:"得 after a verb describes how the action is done. With an object, repeat the verb or put the object first: 他说中文说得很好 or 他中文说得很好. The object never sits between the verb and 得.",
+   ex:[["他 跑 得 很 快","tā pǎo de hěn kuài","He runs fast."],["你 中文 说 得 很 好","nǐ Zhōng wén shuō de hěn hǎo","You speak Chinese well."],["我 昨天 睡 得 不 好","wǒ zuó tiān shuì de bù hǎo","I didn't sleep well last night."]],
+   d:[{t:"fill",q:"他做饭做___很好吃。",o:["得","的","地","了"],why:"The 'how well' complement uses 得."},
+      {t:"fill",q:"Pick the correct sentence: ___",o:["她唱歌唱得很好。","她唱歌得很好。","她唱得歌很好。","她很好唱歌得。"],why:"With an object, repeat the verb: 唱歌唱得…"},
+      {t:"order",zh:"你 汉字 写 得 很 漂亮",en:"Your characters are beautifully written."},
+      {t:"order",zh:"他 吃 饭 吃 得 很 快",en:"He eats fast."}]},
+ { id:"bumei", hsk:1, name:"不 vs 没", zh:"不 / 没", s:"不 + verb (habit, future, adjectives) · 没 + verb (didn't happen)",
+   x:"不 negates habits, wants, the future and adjectives. 没 negates things that didn't happen, and 有. There's no 不有, and 是 always takes 不.",
+   ex:[["我 不 喝 酒","wǒ bù hē jiǔ","I don't drink alcohol."],["我 昨天 没 喝 酒","wǒ zuó tiān méi hē jiǔ","I didn't drink yesterday."],["我 没有 时间","wǒ méi yǒu shí jiān","I don't have time."]],
+   d:[{t:"fill",q:"我明天___去上班。",o:["不","没","没有","别"],why:"Future plans: 不."},
+      {t:"fill",q:"他上个星期___来上课。",o:["没","不","别","不是"],why:"Something that didn't happen: 没."},
+      {t:"fill",q:"这个菜___辣。",o:["不","没","没有了","别"],why:"Adjectives are negated with 不."},
+      {t:"order",zh:"我 今天 没 吃 早饭",en:"I didn't have breakfast today."}]},
+ { id:"neng", hsk:2, name:"会 / 能 / 可以", zh:"会 能 可以", s:"会 learned skill, prediction · 能 able (circumstances) · 可以 permission",
+   x:"会 is for skills you learned (会说中文) and for predictions (明天会下雨). 能 is about being able to right now (今天不能喝酒, I'm driving). 可以 asks or gives permission (这儿可以拍照吗).",
+   ex:[["我 会 游泳","wǒ huì yóu yǒng","I can swim."],["你 明天 能 来 吗 ？","nǐ míng tiān néng lái ma?","Can you come tomorrow?"],["这儿 可以 拍照 吗 ？","zhèr kě yǐ pāi zhào ma?","Can I take photos here?"]],
+   d:[{t:"fill",q:"我___说一点儿中文。",o:["会","可以","要","在"],why:"A learned skill: 会."},
+      {t:"fill",q:"请问，这儿___刷卡吗？",o:["可以","会","要","在"],why:"Asking permission / whether it's allowed: 可以."},
+      {t:"fill",q:"明天___下雨吗？",o:["会","可以","正在","过"],why:"A prediction: 会."},
+      {t:"order",zh:"我 今天 不 能 喝 酒",en:"I can't drink today."}]},
+ { id:"youdian", hsk:2, name:"有点儿 vs 一点儿", zh:"有点儿", s:"有点儿 + adjective (complaint) · adjective + 一点儿 (a bit more)",
+   x:"有点儿 goes before an adjective and usually signals something slightly negative: 有点儿贵. 一点儿 goes after the adjective to ask for 'a bit more X' or to compare: 便宜一点儿. That's why it's 可以便宜一点儿吗.",
+   ex:[["这个 有点儿 贵","zhè ge yǒu diǎnr guì","This is a bit pricey."],["可以 便宜 一点儿 吗 ？","kě yǐ pián yi yì diǎnr ma?","Could you make it a bit cheaper?"],["请 说 慢 一点儿","qǐng shuō màn yì diǎnr","Please speak a bit slower."]],
+   d:[{t:"fill",q:"今天___冷，多穿点儿衣服。",o:["有点儿","一点儿","一些","很多"],why:"A mild complaint, before the adjective: 有点儿冷."},
+      {t:"fill",q:"太辣了，可以少放___辣椒吗？",o:["一点儿","有点儿","很","太"],why:"少放一点儿 = put in a bit less."},
+      {t:"fill",q:"这件衣服有点儿小，有大___的吗？",o:["一点儿","有点儿","很","多"],why:"Comparison / request: adjective + 一点儿."},
+      {t:"order",zh:"我 有点儿 累",en:"I'm a bit tired."}]},
+ { id:"haishi", hsk:2, name:"还是 vs 或者", zh:"还是", s:"A 还是 B? (question) · A 或者 B (statement)",
+   x:"Both mean 'or'. 还是 is for questions asking someone to choose. 或者 is for statements: 周六或者周日都可以.",
+   ex:[["你 喝 茶 还是 咖啡 ？","nǐ hē chá hái shi kā fēi?","Tea or coffee?"],["我们 坐 地铁 或者 打车 都 可以","wǒ men zuò dì tiě huò zhě dǎ chē dōu kě yǐ","We can take the subway or a taxi."],["你 要 大 的 还是 小 的 ？","nǐ yào dà de hái shi xiǎo de?","Big one or small one?"]],
+   d:[{t:"fill",q:"你想吃米饭___面条？",o:["还是","或者","和","也"],why:"A choice question: 还是."},
+      {t:"fill",q:"明天___后天去都可以。",o:["或者","还是","跟","和"],why:"A statement: 或者."},
+      {t:"order",zh:"你 是 澳大利亚人 还是 美国人",en:"Are you Australian or American?"},
+      {t:"order",zh:"我 周末 喜欢 跑步 或者 爬山",en:"On weekends I like running or hiking."}]},
+ { id:"yinwei", hsk:2, name:"因为…所以 / 虽然…但是", zh:"因为 虽然", s:"因为 A，所以 B · 虽然 A，但是 B",
+   x:"Chinese likes to mark both halves of these pairs. 因为…所以… gives the reason then the result; 虽然…但是… gives a contrast. You can drop either word, but the reason or concession still comes first.",
+   ex:[["因为 太 累 了 ， 所以 我 没 去","yīn wèi tài lèi le, suǒ yǐ wǒ méi qù","I was too tired, so I didn't go."],["虽然 很 辣 ， 但是 很 好吃","suī rán hěn là, dàn shì hěn hǎo chī","It's spicy but delicious."],["虽然 我 学 了 两 年 ， 但是 听力 还 不 好","suī rán wǒ xué le liǎng nián, dàn shì tīng lì hái bù hǎo","I've studied for two years, but my listening still isn't good."]],
+   d:[{t:"fill",q:"因为下雨了，___我们没去长城。",o:["所以","但是","虽然","还是"],why:"因为 pairs with 所以."},
+      {t:"fill",q:"虽然这家饭馆很贵，___菜很好吃。",o:["但是","所以","因为","或者"],why:"虽然 pairs with 但是."},
+      {t:"order",zh:"因为 我 喜欢 中国菜 ， 所以 我 学 中文",en:"I like Chinese food, so I'm learning Chinese."},
+      {t:"order",zh:"虽然 很 远 ， 但是 我们 走路 去 吧",en:"It's far, but let's walk."}]},
+ { id:"dir", hsk:2, name:"来 / 去 directions", zh:"进来 出去", s:"Verb + 来/去 · Verb + 上/下/进/出/回/过 + 来/去",
+   x:"来 is movement toward the speaker, 去 away. They combine with direction verbs: 进来 come in, 出去 go out, 回来 come back, 上去 go up. A place goes before 来/去: 回家去.",
+   ex:[["请 进来","qǐng jìn lai","Please come in."],["他 回 家 去 了","tā huí jiā qù le","He's gone home."],["你 什么 时候 回来 ？","nǐ shén me shí hou huí lai?","When are you coming back?"]],
+   d:[{t:"fill",q:"(You're inside) 外面冷，快进___吧！",o:["来","去","到","上"],why:"Toward you, the speaker: 进来."},
+      {t:"fill",q:"(You're leaving home) 我出___买点儿水。",o:["去","来","到","过"],why:"Away from where you are: 出去."},
+      {t:"order",zh:"我 明天 回 澳大利亚 去",en:"I'm going back to Australia tomorrow."},
+      {t:"order",zh:"老师 走 进 教室 来 了",en:"The teacher came into the classroom."}]},
+ { id:"result", hsk:2, name:"Result complements", zh:"听懂 找到", s:"Verb + result (完 / 懂 / 到 / 好 / 错)",
+   x:"A result complement says what the action achieved. 听 is 'listen', 听懂 is 'listen and understand'. 没 + V + result = didn't manage it. V得/不 + result = can / can't: 听得懂, 听不懂.",
+   ex:[["我 听 不 懂","wǒ tīng bu dǒng","I can't understand (what I hear)."],["你 找 到 护照 了 吗 ？","nǐ zhǎo dào hù zhào le ma?","Did you find your passport?"],["我 吃 完 了","wǒ chī wán le","I've finished eating."]],
+   d:[{t:"fill",q:"他说得太快，我没听___。",o:["懂","完","到","好"],why:"听懂 = understand by listening."},
+      {t:"fill",q:"你的钱包找___了吗？",o:["到","懂","完","会"],why:"找到 = look for and find."},
+      {t:"fill",q:"对不起，我写___了一个字。",o:["错","懂","完","到"],why:"写错 = write wrongly."},
+      {t:"order",zh:"你 看 得 懂 这 个 菜单 吗",en:"Can you read this menu?"}]},
+ { id:"ba", hsk:3, name:"把 doing something to it", zh:"把", s:"Subject + 把 + object + verb + something",
+   x:"把 moves the object before the verb to say what you did to it. The verb can't stand alone: it needs a result, a direction, 了 or a place after it. Very common for handling things: 把门关上, 把护照给我.",
+   ex:[["我 把 护照 忘 在 酒店 了","wǒ bǎ hù zhào wàng zài jiǔ diàn le","I left my passport at the hotel."],["请 把 菜单 给 我","qǐng bǎ cài dān gěi wǒ","Please pass me the menu."],["我 把 饭 吃 完 了","wǒ bǎ fàn chī wán le","I finished the food."]],
+   d:[{t:"fill",q:"请___门关上。",o:["把","被","给","在"],why:"把 + object + verb + result."},
+      {t:"fill",q:"Pick the correct sentence: ___",o:["我把咖啡喝完了。","我把咖啡喝。","我喝把咖啡完了。","把我咖啡喝完了。"],why:"The verb after 把 needs something after it (完了)."},
+      {t:"order",zh:"他 把 钱 放 在 桌子 上 了",en:"He put the money on the table."},
+      {t:"order",zh:"请 把 剩菜 打包",en:"Please pack up the leftovers."}]},
+ { id:"jiucai", hsk:3, name:"就 vs 才", zh:"就 / 才", s:"Time + 就 + verb (了): early · Time + 才 + verb: late",
+   x:"就 says it happened earlier or more easily than expected and often takes 了. 才 says later or harder than expected, and doesn't take 了.",
+   ex:[["他 六 点 就 起床 了","tā liù diǎn jiù qǐ chuáng le","He was up by six."],["我 十二 点 才 睡觉","wǒ shí èr diǎn cái shuì jiào","I didn't get to bed until twelve."],["你 怎么 现在 才 来 ？","nǐ zěn me xiàn zài cái lái?","Why are you only getting here now?"]],
+   d:[{t:"fill",q:"电影八点开始，他七点___到了。",o:["就","才","再","又"],why:"Earlier than needed: 就…了."},
+      {t:"fill",q:"飞机晚了三个小时，我们半夜___到酒店。",o:["才","就","再","还"],why:"Later than expected: 才 (no 了)."},
+      {t:"order",zh:"我 学 了 三 年 才 听 得 懂",en:"It took me three years before I could understand."},
+      {t:"order",zh:"我 五 分钟 就 到",en:"I'll be there in five minutes."}]},
+ { id:"mw", hsk:1, name:"Measure words", zh:"量词", s:"Number / 这 / 那 + measure word + noun",
+   x:"Every counted noun needs a measure word between the number and the noun. 个 is the safe default. Worth knowing: 只 animals, 本 books, 杯 cups, 瓶 bottles, 碗 bowls, 张 flat things, 条 long thin things, 件 clothes and matters. And 2 is 两, not 二, before a measure word.",
+   ex:[["一 只 猫","yì zhī māo","a cat"],["两 本 书","liǎng běn shū","two books"],["三 张 票","sān zhāng piào","three tickets"]],
+   d:[{t:"fill",q:"我想买两___票。",o:["张","本","只","条"],why:"Tickets are flat: 张."},
+      {t:"fill",q:"他家有一___狗。",o:["只","本","张","件"],why:"Animals: 只."},
+      {t:"fill",q:"这___裤子太长了。",o:["条","件","本","只"],why:"Trousers are long and thin: 条. Tops take 件."},
+      {t:"fill",q:"我想要___杯咖啡。",o:["两","二","双","俩"],why:"Before a measure word, 2 is 两."}]},
+ { id:"zaiyou", hsk:2, name:"再 vs 又 again", zh:"再 / 又", s:"再 + verb (again, not yet) · 又 + verb + 了 (again, already)",
+   x:"Both mean 'again'. 再 is for a repeat that hasn't happened yet: requests and plans (再来一瓶). 又 is for a repeat that already happened (他又迟到了).",
+   ex:[["请 再 说 一 遍","qǐng zài shuō yí biàn","Please say that again."],["他 又 迟到 了","tā yòu chí dào le","He's late again."],["我们 明天 再 来","wǒ men míng tiān zài lái","We'll come again tomorrow."]],
+   d:[{t:"fill",q:"服务员，___来一碗米饭。",o:["再","又","还是","也"],why:"A request (future repeat): 再."},
+      {t:"fill",q:"昨天下雨，今天___下雨了。",o:["又","再","才","就"],why:"It already happened again: 又…了."},
+      {t:"order",zh:"欢迎 你们 再 来",en:"Please come again."},
+      {t:"order",zh:"我 又 忘 了 他 的 名字",en:"I forgot his name again."}]},
+ { id:"yibian", hsk:2, name:"一边…一边 while", zh:"一边", s:"Subject + 一边 + verb A + 一边 + verb B",
+   x:"Two actions at the same time by the same person. The subject comes first, then each verb gets its own 一边.",
+   ex:[["他 一边 吃 饭 一边 看 电视","tā yì biān chī fàn yì biān kàn diàn shì","He watches TV while eating."],["我 喜欢 一边 跑步 一边 听 音乐","wǒ xǐ huan yì biān pǎo bù yì biān tīng yīn yuè","I like listening to music while I run."],["我们 一边 走 一边 聊","wǒ men yì biān zǒu yì biān liáo","We chatted as we walked."]],
+   d:[{t:"fill",q:"她一边做饭，___听音乐。",o:["一边","一下","一起","一点"],why:"Both actions take 一边."},
+      {t:"fill",q:"Pick the correct sentence: ___",o:["我一边吃饭一边看手机。","一边我吃饭一边看手机。","我吃饭一边看手机一边。","我一边吃饭看手机一边。"],why:"Subject first, then 一边 + verb, 一边 + verb."},
+      {t:"order",zh:"我 一边 喝 咖啡 一边 学习",en:"I study while drinking coffee."},
+      {t:"order",zh:"别 一边 开车 一边 打 电话",en:"Don't talk on the phone while driving."}]}
+];
+/* ===================== HELPERS ===================== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const DAY = 86400000;
+const dkey = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const todayKey = () => dkey(new Date());
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pick = (a, n) => shuffle(a).slice(0, n);
+const rand = a => a[Math.floor(Math.random() * a.length)];
+const isPunct = t => /^[，。？！、,.?!]+$/.test(t);
+const joinZh = s => s.split(" ").join("");
+
+const TONE = {};
+"āēīōūǖĀĒĪŌŪ".split("").forEach(c => TONE[c] = 1);
+"áéíóúǘÁÉÍÓÚ".split("").forEach(c => TONE[c] = 2);
+"ǎěǐǒǔǚǍĚǏǑǓ".split("").forEach(c => TONE[c] = 3);
+"àèìòùǜÀÈÌÒÙ".split("").forEach(c => TONE[c] = 4);
+function toneOf(s) { for (const c of s) if (TONE[c]) return TONE[c]; return 5; }
+function pyHtml(py) { return String(py || "").split(" ").map(s => `<span class="t${toneOf(s)}">${esc(s)}</span>`).join(" "); }
+
+const ICON = {
+  play: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>',
+  slow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 15c0-4 3.5-7 8-7s8 3 8 7H3z"/><path d="M19 15c1.5 0 2-1 2-2M7 15v3M15 15v3"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>',
+  speaker: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg>'
+};
+const spk = (text, label = "Play") => `<button class="iconbtn" data-act="say" data-t="${esc(text)}" aria-label="${label}">${ICON.speaker}</button>`;
+
+/* ===================== DERIVED DATA ===================== */
+const DISHES = MENU.flatMap(s => s.items.map(it => ({ ...it, sec: s.sec })));
+const WORDMAP = Object.fromEntries(MENU_WORDS.map(w => [w[0], w]));
+function segment(zh) {
+  const out = []; let i = 0;
+  while (i < zh.length) {
+    let hit = null;
+    for (let L = 3; L >= 1; L--) { const s = zh.slice(i, i + L); if (WORDMAP[s]) { hit = s; break; } }
+    if (hit) { out.push([hit, WORDMAP[hit]]); i += hit.length; } else { out.push([zh[i], null]); i++; }
+  }
+  return out;
+}
+function orderPhrase(d) {
+  if (d.u === "两") return { zh: "来三两" + d.zh, py: "lái sān liǎng " + d.py };
+  if (d.u === "只") return { zh: "来半只" + d.zh, py: "lái bàn zhī " + d.py };
+  const U = UNITS[d.u] || ["gè", 4];
+  return { zh: "来一" + d.u + d.zh, py: `lái ${U[1] === 4 ? "yí" : "yì"} ${U[0]} ${d.py}` };
+}
+function numZh(n) {
+  const d = "零一二三四五六七八九";
+  const teen = r => "一十" + (r % 10 ? d[r % 10] : "");
+  if (n < 10) return d[n];
+  if (n < 20) return "十" + (n % 10 ? d[n % 10] : "");
+  if (n < 100) return d[Math.floor(n / 10)] + "十" + (n % 10 ? d[n % 10] : "");
+  if (n < 1000) {
+    const h = Math.floor(n / 100), r = n % 100, s = (h === 2 ? "两" : d[h]) + "百";
+    if (!r) return s; if (r < 10) return s + "零" + d[r]; return s + (r < 20 ? teen(r) : numZh(r));
+  }
+  const t = Math.floor(n / 1000), r = n % 1000, s = (t === 2 ? "两" : d[t]) + "千";
+  if (!r) return s; if (r < 100) return s + "零" + (r < 10 ? d[r] : r < 20 ? teen(r) : numZh(r)); return s + numZh(r);
+}
+
+/* ===================== PROGRESS STORE ===================== */
+const LS_KEY = "xiaolaoshi.v1";
+const DEFAULT = () => ({ v: 1, items: {}, days: {}, area: {}, customs: [], settings: { rate: 0.9, voice: "", pinyin: true, menuPy: false, menuEn: false } });
+function normalise(o) { const b = DEFAULT(); o = o || {}; return { ...b, ...o, settings: { ...b.settings, ...(o.settings || {}) }, items: o.items || {}, days: o.days || {}, area: o.area || {}, customs: o.customs || [] }; }
+let P = DEFAULT();
+try { const s = localStorage.getItem(LS_KEY); if (s) P = normalise(JSON.parse(s)); } catch (e) { }
+
+const store = { ref: null, mode: "local", pushing: false, again: false, timer: null };
+function setSync(mode) {
+  store.mode = mode;
+  const el = $("#sync"); if (!el) return;
+  const txt = { cloud: "Saved to your account", local: "Saved on this device", error: "Sync paused" }[mode];
+  el.innerHTML = `<i class="dot ${mode === "cloud" ? "on" : ""}"></i><span>${txt}</span>`;
+}
+function save() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(P)); } catch (e) { }
+  clearTimeout(store.timer); store.timer = setTimeout(pushRemote, 1500);
+}
+async function pushRemote() {
+  if (!store.ref) return;
+  if (store.pushing) { store.again = true; return; }
+  store.pushing = true;
+  try { await store.ref.set(JSON.parse(JSON.stringify(P))); setSync("cloud"); }
+  catch (e) { setSync("error"); }
+  store.pushing = false;
+  if (store.again) { store.again = false; pushRemote(); }
+}
+function mergeProgress(a, b) {
+  const out = normalise(b);
+  for (const [k, v] of Object.entries(a.items)) { const r = out.items[k]; if (!r || (v.seen || 0) > (r.seen || 0)) out.items[k] = v; }
+  for (const [k, v] of Object.entries(a.days)) { const r = out.days[k]; if (!r || v.n > r.n) out.days[k] = v; }
+  for (const [k, v] of Object.entries(a.area)) { const r = out.area[k]; if (!r || v.n > r.n) out.area[k] = v; }
+  const have = new Set(out.customs.map(c => c.zh));
+  a.customs.forEach(c => { if (!have.has(c.zh)) out.customs.push(c); });
+  return out;
+}
+async function initCloud() {
+  try {
+    if (!window.claude || !window.claude.use) return;
+    const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+    if (!db || !user) return;
+    const id = await user.id(); if (!id) return;
+    const ref = db.doc("data/users/" + id + "/progress");
+    const snap = await ref.get();
+    const before = JSON.stringify(P);
+    if (snap.exists) P = mergeProgress(P, snap.data());
+    store.ref = ref; setSync("cloud");
+    const changed = !snap.exists || JSON.stringify(normalise(snap.data())) !== JSON.stringify(P);
+    try { localStorage.setItem(LS_KEY, JSON.stringify(P)); } catch (e) { }
+    if (changed && Object.keys(P.items).length) pushRemote();
+    if (before !== JSON.stringify(P) && !S) render();
+  } catch (e) { setSync("local"); }
+}
+
+/* ===================== SPACED REPETITION ===================== */
+function grade(key, ok, area) {
+  const now = Date.now();
+  const it = P.items[key] || { reps: 0, int: 0, ease: 2.3, seen: 0, right: 0, due: 0 };
+  it.seen++;
+  if (ok) {
+    it.right++; it.reps++;
+    it.int = it.reps === 1 ? 1 : it.reps === 2 ? 3 : Math.round(it.int * it.ease);
+    it.ease = Math.min(3, it.ease + 0.05); it.due = now + it.int * DAY;
+  } else {
+    it.reps = 0; it.int = 0; it.ease = Math.max(1.3, it.ease - 0.2); it.due = now + 10 * 60000;
+  }
+  P.items[key] = it; tally(area, ok);
+}
+function tally(area, ok) {
+  const d = todayKey(); const day = P.days[d] || { n: 0, c: 0 }; day.n++; if (ok) day.c++; P.days[d] = day;
+  const a = P.area[area] || { n: 0, c: 0 }; a.n++; if (ok) a.c++; P.area[area] = a;
+}
+function keysFor(p) {
+  switch (p) {
+    case "LM": return LISTEN.map((_, i) => "LM:" + i);
+    case "LB": return LISTEN.map((_, i) => "LB:" + i);
+    case "TN": return TONE_WORDS.map((_, i) => "TN:" + i);
+    case "MC": return MENU_WORDS.map((_, i) => "MC:" + i);
+    case "MD": return DISHES.map((_, i) => "MD:" + i);
+    case "MW": return MEASURES.map((_, i) => "MW:" + i);
+    case "OR": return DIALOGUES.flatMap((d, s) => d.steps.map((_, j) => "OR:" + s + ":" + j));
+    case "G": return GRAMMAR.flatMap(g => g.d.map((_, j) => "G:" + g.id + ":" + j));
+    case "C": return P.customs.map(c => "C:" + c.id);
+  }
+  return [];
+}
+const AREA = { LM: "listen", LB: "listen", TN: "listen", NUM: "listen", OR: "menu", MC: "menu", MD: "menu", MW: "menu", C: "menu", G: "grammar" };
+const areaOf = k => AREA[k.split(":")[0]];
+function dueKeys(prefixes) {
+  const now = Date.now();
+  return Object.entries(P.items).filter(([k, v]) => v.due <= now && prefixes.includes(k.split(":")[0]))
+    .sort((a, b) => a[1].due - b[1].due).map(e => e[0]);
+}
+const freshKeys = prefixes => prefixes.flatMap(keysFor).filter(k => !P.items[k]);
+function roundKeys(prefixes, n = 5) {
+  if (prefixes.length === 1 && prefixes[0] === "NUM") return Array(n).fill("NUM");
+  const out = dueKeys(prefixes).slice(0, n);
+  for (const k of shuffle(freshKeys(prefixes))) { if (out.length >= n) break; out.push(k); }
+  for (const k of shuffle(prefixes.flatMap(keysFor))) { if (out.length >= n) break; if (!out.includes(k)) out.push(k); }
+  return shuffle(out);
+}
+function todayKeys() {
+  const all = ["LM", "LB", "TN", "G", "MC", "MD", "MW", "OR", "C"];
+  const out = dueKeys(all).slice(0, 3);
+  const plan = shuffle(["L", "G", "L", "G", "M"]);
+  for (const t of plan) {
+    if (out.length >= 5) break;
+    if (t === "L" && Math.random() < 0.2 && !out.includes("NUM")) { out.push("NUM"); continue; }
+    const pref = t === "L" ? rand([["LM"], ["LB"], ["TN"], ["LM"], ["LB"]]) : t === "G" ? ["G"] : rand([["MC"], ["MD"], ["MW"]]);
+    const k = shuffle(freshKeys(pref)).find(x => !out.includes(x)) || shuffle(pref.flatMap(keysFor)).find(x => !out.includes(x));
+    if (k) out.push(k);
+  }
+  return shuffle(out);
+}
+function streak() {
+  let n = 0; const d = new Date();
+  if (!P.days[dkey(d)]) d.setDate(d.getDate() - 1);
+  while (P.days[dkey(d)]) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+
+/* ===================== SPEECH ===================== */
+const TTS = { voices: [], ok: "speechSynthesis" in window };
+function loadVoices() {
+  if (!TTS.ok) return;
+  TTS.voices = speechSynthesis.getVoices().filter(v => /^(zh|cmn)/i.test(v.lang) && !/(HK|TW|yue)/i.test(v.lang) || /mandarin|普通话/i.test(v.name));
+}
+if (TTS.ok) { loadVoices(); speechSynthesis.onvoiceschanged = () => { loadVoices(); if (!S && (state.tab === "me" || state.tab === "listen")) render(); }; }
+function pickVoice() {
+  let v = TTS.voices.find(v => v.name === P.settings.voice);
+  if (!v) for (const r of [/xiaoxiao/i, /tingting/i, /yunxi/i, /google/i, /huihui/i, /zh-CN/i]) { v = TTS.voices.find(x => r.test(x.name) || r.test(x.lang)); if (v) break; }
+  return v || TTS.voices[0];
+}
+function speak(text, slow) {
+  if (!TTS.ok || !text) return;
+  if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(String(text).replace(/\s+/g, ""));
+  const v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "zh-CN";
+  u.rate = (P.settings.rate || 0.9) * (slow ? 0.65 : 1);
+  speechSynthesis.speak(u);
+}
+
+/* ===================== CLAUDE (optional) ===================== */
+let SAMPLE = null, CAN_IMG = false;
+if (window.claude && window.claude.use) {
+  claude.use("sample").then(async s => {
+    SAMPLE = s;
+    if (s) { try { const l = await s.limits(); CAN_IMG = !!(l && l.images); } catch (e) { } }
+    if (!S && (state.tab === "menu" || state.tab === "grammar")) render();
+  }).catch(() => { });
+}
+/* Standalone mode: outside Claude, use your own Anthropic API key (kept in this browser only). */
+const STANDALONE = !(window.claude && window.claude.use);
+const API = { key: "", model: "claude-sonnet-4-5" };
+try { API.key = localStorage.getItem("xiaolaoshi.apikey") || ""; API.model = localStorage.getItem("xiaolaoshi.model") || API.model; } catch (e) { }
+function fileToB64(f) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1]); r.onerror = rej; r.readAsDataURL(f); }); }
+function makeApiSample() {
+  const call = async (input, opts = {}) => {
+    const msgs = (typeof input === "string" ? [{ role: "user", content: input }] : input).map(m => ({ role: m.role, content: m.content }));
+    if (opts.images) {
+      const f = opts.images; const data = await fileToB64(f);
+      const last = msgs[msgs.length - 1];
+      last.content = [{ type: "image", source: { type: "base64", media_type: f.type || "image/jpeg", data } }, { type: "text", text: last.content }];
+    }
+    let r;
+    try {
+      r = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": API.key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" }, body: JSON.stringify({ model: API.model, max_tokens: 2000, messages: msgs }) });
+    } catch (e) { throw { code: "upstream_error" }; }
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw { code: r.status === 401 ? "bad_key" : r.status === 429 ? "rate_limited" : r.status === 404 ? "bad_model" : "upstream_error", message: (j.error && j.error.message) || "" };
+    const text = (j.content || []).filter(b => b.type === "text").map(b => b.text).join("");
+    if (opts.onText) opts.onText({ text, delta: text });
+    return { text, truncated: j.stop_reason === "max_tokens" };
+  };
+  call.json = async (input, opts) => {
+    const { text } = await call(input, opts);
+    const m = text.match(/```(?:json)?\s*([\s\S]*?)```/); const body = m ? m[1] : text;
+    try { return JSON.parse(body); } catch (e) { }
+    const a = body.search(/[\[{]/), b = Math.max(body.lastIndexOf("]"), body.lastIndexOf("}"));
+    try { return JSON.parse(body.slice(a, b + 1)); } catch (e) { throw { code: "invalid_json", text }; }
+  };
+  call.limits = async () => ({ images: { maxCount: 1 } });
+  return call;
+}
+if (STANDALONE && API.key) { SAMPLE = makeApiSample(); CAN_IMG = true; }
+const SAMPLE_ERR = {
+  bad_key: "Your Anthropic API key was rejected. Check it under Progress › Claude features.",
+  bad_model: "That model name wasn't found. Check it under Progress › Claude features.",
+  not_granted: "Claude features are switched off for this page.", sampling_disabled: "Claude isn't available on this account.",
+  rate_limited: "Too many requests just now. Try again in a minute.", refused: "Claude couldn't help with that. Try different text.",
+  invalid_json: "The answer came back garbled. Tap the button again.", image_rejected: "That image couldn't be read. Try a smaller or clearer photo.",
+  session_expired: "Please sign in again, then retry."
+};
+const errText = e => SAMPLE_ERR[e && e.code] || "Something went wrong reaching Claude. Try again.";
+const MENU_TEXT = DISHES.map(d => `${d.zh} ¥${d.p}/${d.u}`).join("、");
+
+/* ===================== QUESTION BUILDERS ===================== */
+function mkChoice(correct, wrongs) {
+  const all = shuffle([{ v: correct, ok: true }, ...wrongs.map(v => ({ v, ok: false }))]);
+  return { opts: all.map(o => o.v), answer: all.findIndex(o => o.ok), order: all };
+}
+function similarPick(pool, i, keyFn, n) {
+  const mine = new Set(keyFn(pool[i]));
+  const scored = pool.map((x, j) => ({ j, s: j === i ? -1 : keyFn(x).filter(t => mine.has(t)).length + Math.random() }))
+    .filter(o => o.j !== i).sort((a, b) => b.s - a.s).slice(0, 7);
+  return pick(scored, n).map(o => pool[o.j]);
+}
+function build(key) {
+  const [p, a, b] = key.split(":");
+  try {
+    switch (p) {
+      case "LM": return qLM(+a); case "LB": return qLB(+a); case "TN": return qTN(+a);
+      case "MC": return qMC(+a); case "MD": return qMD(+a); case "MW": return qMW(+a);
+      case "OR": return qOR(+a, +b); case "G": return qG(a, +b); case "NUM": return qNUM(); case "C": return qC(a);
+    }
+  } catch (e) { return null; }
+  return null;
+}
+function qLM(i) {
+  const s = LISTEN[i]; if (!s) return null;
+  const zh = joinZh(s[0]);
+  const others = similarPick(LISTEN, i, x => x[0].split(" "), 3).map(x => x[2]);
+  return { key: "LM:" + i, kind: "choice", label: "Listen, then choose the meaning", audio: zh, auto: true, ...mkChoice(s[2], others), reveal: { zh, py: s[1], en: s[2] } };
+}
+function qLB(i) {
+  const s = LISTEN[i]; if (!s) return null;
+  const toks = s[0].split(" ").filter(t => !isPunct(t));
+  const pool = [...new Set(LISTEN.flatMap((x, j) => j === i ? [] : x[0].split(" ")).filter(t => !isPunct(t) && !toks.includes(t)))];
+  let tiles = shuffle([...toks, ...pick(pool, toks.length > 6 ? 2 : 1)]);
+  return { key: "LB:" + i, kind: "order", label: "Build the sentence you hear", audio: joinZh(s[0]), auto: true, tiles, answers: [toks], hint: s[2], reveal: { zh: joinZh(s[0]), py: s[1], en: s[2] } };
+}
+function toneLabel(arr) { return arr.map(t => `<span class="t${t}">${t === 5 ? "·" : t}</span>`).join(" + "); }
+function qTN(i) {
+  const w = TONE_WORDS[i]; if (!w) return null;
+  const tones = w[1].split(" ").map(toneOf);
+  const sig = a => a.join("-"); const seen = new Set([sig(tones)]); const wrong = [];
+  let guard = 0;
+  while (wrong.length < 3 && guard++ < 200) {
+    const c = tones.map(t => Math.random() < 0.6 ? 1 + Math.floor(Math.random() * 4) : t);
+    if (!seen.has(sig(c))) { seen.add(sig(c)); wrong.push(c); }
+  }
+  const ch = mkChoice(tones, wrong);
+  let why = "Tones: " + w[1] + ".";
+  if (tones[0] === 3 && tones[1] === 3) why += " Two 3rd tones in a row: the first one is said like a 2nd tone, so it sounds like 2 + 3.";
+  if (tones.includes(5)) why += " · is the neutral tone: short and light.";
+  return { key: "TN:" + i, kind: "choice", label: "Which tones do you hear?", audio: w[0], auto: true, opts: ch.opts.map(t => ({ html: toneLabel(t) })), answer: ch.answer, why, reveal: { zh: w[0], py: w[1], en: w[2] } };
+}
+function qMC(i) {
+  const w = MENU_WORDS[i]; if (!w) return null;
+  const same = MENU_WORDS.filter(x => x[3] === w[3] && x[2] !== w[2]);
+  const other = MENU_WORDS.filter(x => x[3] !== w[3]);
+  const wr = [...pick(same, 3), ...pick(other, 3)].slice(0, 3).map(x => x[2]);
+  return { key: "MC:" + i, kind: "choice", label: "What does this mean on a menu?", show: w[0], big: true, ...mkChoice(w[2], wr), reveal: { zh: w[0], py: w[1], en: w[2] } };
+}
+function qMD(i) {
+  const d = DISHES[i]; if (!d) return null;
+  const wr = similarPick(DISHES, i, x => x.zh.split(""), 3).map(x => x.en);
+  return { key: "MD:" + i, kind: "choice", label: "Which dish is this?", show: d.zh, big: true, ...mkChoice(d.en, wr), dish: d, why: d.note || "", reveal: { zh: d.zh, py: d.py, en: d.en } };
+}
+function qMW(i) {
+  const m = MEASURES[i]; if (!m) return null;
+  const ch = mkChoice(m.a, m.o.filter(x => x !== m.a));
+  return { key: "MW:" + i, kind: "choice", label: "Pick the measure word · " + m.en, show: m.q.replace("___", "＿"), opts: ch.opts.map(x => ({ zh: x })), answer: ch.answer, why: m.why, reveal: { zh: m.q.replace("___", m.a), py: m.py, en: m.en } };
+}
+function qOR(s, j) {
+  const d = DIALOGUES[s]; const st = d && d.steps[j]; if (!st) return null;
+  const all = shuffle(st.o.map((o, k) => ({ o, ok: k === 0 })));
+  return { key: `OR:${s}:${j}`, kind: "choice", label: "The waiter says… choose your reply", audio: st.w, auto: true, hideText: true,
+    opts: all.map(x => ({ zh: x.o[0], py: x.o[1] })), answer: all.findIndex(x => x.ok), whys: all.map(x => x.o[3]), optEn: all.map(x => x.o[2]),
+    reveal: { zh: st.w, py: st.py, en: st.en } };
+}
+function qG(id, j) {
+  const g = GRAMMAR.find(x => x.id === id); const d = g && g.d[j]; if (!d) return null;
+  if (d.t === "fill") {
+    const ch = mkChoice(d.o[0], d.o.slice(1));
+    const pickSentence = /^Pick the correct/.test(d.q);
+    const full = pickSentence ? d.o[0] : d.q.replace("___", d.o[0]);
+    return { key: `G:${id}:${j}`, kind: "choice", label: g.name, show: pickSentence ? "Which sentence is correct?" : d.q.replace("___", "＿＿"), plainShow: pickSentence,
+      opts: ch.opts.map(x => ({ zh: x })), answer: ch.answer, why: d.why, pattern: g, reveal: { zh: full.replace(/^\(.*?\)\s*/, "") } };
+  }
+  const toks = d.zh.split(" ").filter(t => !isPunct(t));
+  let tiles = shuffle(toks); let guard = 0;
+  while (tiles.join("") === toks.join("") && toks.length > 2 && guard++ < 10) tiles = shuffle(toks);
+  return { key: `G:${id}:${j}`, kind: "order", label: g.name + " · put the words in order", en: d.en, tiles, answers: [toks], pattern: g, reveal: { zh: joinZh(d.zh), en: d.en } };
+}
+function qNUM() {
+  const t = rand(["price", "price", "time", "room"]);
+  if (t === "price") {
+    const half = Math.random() < 0.3; const n = rand([5 + Math.floor(Math.random() * 45), 20 + Math.floor(Math.random() * 180), 100 + Math.floor(Math.random() * 300)]);
+    const zh = "一共" + numZh(n) + "块" + (half ? "五" : "");
+    return { key: "NUM", kind: "input", label: "How much? Type the price in yuan", audio: zh, auto: true, placeholder: "e.g. 38 or 26.5", check: v => Math.abs(parseFloat(v.replace(/[^\d.]/g, "")) - (n + (half ? 0.5 : 0))) < 0.001, answerText: "¥" + (n + (half ? 0.5 : 0)), reveal: { zh, en: "That's ¥" + (n + (half ? 0.5 : 0)) + " altogether." }, why: half ? "块 = yuan. A digit after 块 means tenths: 块五 = .50." : "块 is how people say 元 (yuan) out loud." };
+  }
+  if (t === "time") {
+    const h = 1 + Math.floor(Math.random() * 12); const m = rand([0, 30, 15, 45, 5, 10, 20, 40, 50]);
+    const hz = (h === 2 ? "两" : numZh(h)) + "点";
+    const mz = m === 0 ? "" : m === 30 ? "半" : m === 15 ? "一刻" : m === 45 ? "三刻" : m < 10 ? "零" + numZh(m) + "分" : numZh(m) + "分";
+    const ans = h + ":" + String(m).padStart(2, "0");
+    return { key: "NUM", kind: "input", label: "What time? Type it like 7:30", audio: "我们" + hz + mz + "见", auto: true, placeholder: "e.g. 7:30", check: v => v.replace(/[.\s：]/g, ":").replace(/^(\d{1,2}):?(\d{2})$/, "$1:$2") === ans, answerText: ans, reveal: { zh: "我们" + hz + mz + "见", en: "See you at " + ans + "." }, why: "点 = o'clock, 半 = half past, 一刻 = quarter past, 三刻 = quarter to the next hour. 2 o'clock is 两点." };
+  }
+  const n = String(100 + Math.floor(Math.random() * 900)) + (Math.random() < 0.4 ? String(Math.floor(Math.random() * 10)) : "");
+  const dz = "零幺二三四五六七八九"; const z = n.split("").map(c => dz[+c]).join("");
+  return { key: "NUM", kind: "input", label: "Room number? Type the digits", audio: "您的房间是" + z + "号", auto: true, placeholder: "e.g. 1208", check: v => v.replace(/\D/g, "") === n, answerText: n, reveal: { zh: "您的房间是" + z + "号", en: "Your room is " + n + "." }, why: "Room, phone and bus numbers are read digit by digit, and 1 is often said 幺 yāo so it isn't confused with 七 qī." };
+}
+function qC(id) {
+  const c = P.customs.find(x => x.id === id); if (!c) return null;
+  const pool = [...P.customs.filter(x => x.id !== id).map(x => x.en), ...DISHES.map(x => x.en)];
+  return { key: "C:" + id, kind: "choice", label: "From a menu you scanned", show: c.zh, big: true, ...mkChoice(c.en, pick(pool.filter(x => x !== c.en), 3)), why: c.what || "", reveal: { zh: c.zh, py: c.py, en: c.en } };
+}
+
+/* ===================== APP STATE ===================== */
+const state = { tab: "today", menuView: "read", openDish: null, gOpen: null, libOpen: false, libShown: {}, scan: { busy: false, items: [], err: "", text: "", file: null }, chat: null, gcheck: { busy: false, out: "", err: "" }, resetArm: false };
+let S = null;
+
+function startRound(title, keys, again, keepOrder) {
+  let qs = keys.map(build).filter(Boolean);
+  if (!qs.length) return;
+  S = { title, qs, i: 0, res: [], answered: false, sel: null, placed: [], input: "", showText: false, hint: false, summary: false, again };
+  render(); window.scrollTo(0, 0); autoplay();
+}
+function autoplay() { const q = S && !S.summary && S.qs[S.i]; if (q && q.auto && q.audio) setTimeout(() => speak(q.audio), 250); }
+function answer(ok) {
+  const q = S.qs[S.i]; S.answered = true; S.ok = ok;
+  if (q.key === "NUM") tally("listen", ok); else grade(q.key, ok, areaOf(q.key));
+  S.res.push({ q, ok }); save(); render();
+  if (!q.audio && q.reveal && q.reveal.zh) setTimeout(() => speak(q.reveal.zh), 200);
+}
+function next() {
+  S.i++; Object.assign(S, { answered: false, sel: null, placed: [], input: "", showText: false, hint: false });
+  if (S.i >= S.qs.length) S.summary = true;
+  render(); window.scrollTo(0, 0); autoplay();
+}
+function checkOrder() {
+  const q = S.qs[S.i]; const got = S.placed.map(i => q.tiles[i]).join("|");
+  answer(q.answers.some(a => a.join("|") === got));
+}
+
+/* ===================== VIEWS: QUIZ ===================== */
+function revealBlock(q) {
+  const r = q.reveal || {};
+  let h = `<div class="reveal stack" style="gap:4px">`;
+  if (r.zh) h += `<div class="row"><span class="hz">${esc(r.zh)}</span>${spk(r.zh)}<button class="iconbtn" data-act="slow" data-t="${esc(r.zh)}" aria-label="Play slowly">${ICON.slow}</button></div>`;
+  if (r.py) h += `<div class="py">${pyHtml(r.py)}</div>`;
+  if (r.en) h += `<div>${esc(r.en)}</div>`;
+  h += `</div>`;
+  if (q.dish) h += `<div class="break">${segment(q.dish.zh).map(([t, w]) => `<span><b class="hz">${esc(t)}</b> ${w ? `<span class="py">${pyHtml(w[1])}</span> ${esc(w[2])}` : ""}</span>`).join("")}</div>`;
+  return h;
+}
+function viewQuiz() {
+  const q = S.qs[S.i], n = S.qs.length;
+  const pips = S.qs.map((_, k) => `<i class="${k < S.res.length ? (S.res[k].ok ? "ok" : "no") : k === S.i ? "cur" : ""}"></i>`).join("");
+  let h = `<section class="quiz"><div class="qhead"><button class="iconbtn" data-act="quit" aria-label="End round">${ICON.x}</button><div class="pips">${pips}</div><span class="muted" style="font-variant-numeric:tabular-nums">${S.i + 1}/${n}</span></div>`;
+  h += `<div class="card prompt"><div class="label">${esc(q.label)}</div>`;
+  if (q.audio) {
+    h += `<div class="playrow"><button class="iconbtn lg" data-act="replay" aria-label="Play">${ICON.play}</button><button class="iconbtn" data-act="replay-slow" aria-label="Play slowly">${ICON.slow}</button></div>`;
+    if (q.hideText && !S.answered) h += S.showText ? `<div class="hzmed">${esc(q.reveal.zh)}</div><div class="py">${pyHtml(q.reveal.py)}</div>` : `<button class="btn sm ghost" data-act="showtext">Show the text</button>`;
+  }
+  if (q.show) h += q.plainShow ? `<div style="font-weight:600">${esc(q.show)}</div>` : `<div class="${q.big ? "hzbig" : "hzmed"}">${esc(q.show)}</div>`;
+  if (q.en) h += `<div style="font-size:17px;font-weight:600">${esc(q.en)}</div>`;
+  if (q.kind === "order" && q.hint && !S.answered) h += S.hint ? `<div class="muted">${esc(q.hint)}</div>` : `<button class="btn sm ghost" data-act="hint">Show English hint</button>`;
+  h += `</div>`;
+
+  if (q.kind === "choice") {
+    h += `<div class="opts">` + q.opts.map((o, k) => {
+      let cls = "opt";
+      if (S.answered) { if (k === q.answer) cls += " right"; else if (k === S.sel) cls += " wrong"; }
+      let inner;
+      if (typeof o === "string") inner = `<span>${esc(o)}</span>`;
+      else if (o.html) inner = `<span style="font-size:18px;font-weight:700">${o.html}</span>`;
+      else inner = `<span class="hz">${esc(o.zh)}</span>${o.py && (P.settings.pinyin || S.answered) ? `<span class="py">${pyHtml(o.py)}</span>` : ""}${S.answered && q.optEn ? `<span class="muted" style="font-size:13px">${esc(q.optEn[k])}</span>` : ""}`;
+      return `<button class="${cls}" data-act="choose" data-i="${k}" ${S.answered ? "disabled" : ""}><span class="k">${k + 1}</span><span class="ot">${inner}</span></button>`;
+    }).join("") + `</div>`;
+  } else if (q.kind === "order") {
+    h += `<div class="tiles answerline">${S.placed.map((ti, pos) => `<button class="tile" data-act="untile" data-pos="${pos}" ${S.answered ? "disabled" : ""}>${esc(q.tiles[ti])}</button>`).join("") || `<span class="muted" style="align-self:center">Tap the words below in order</span>`}</div>`;
+    if (!S.answered) {
+      h += `<div class="tiles">${q.tiles.map((t, i) => `<button class="tile ${S.placed.includes(i) ? "used" : ""}" data-act="tile" data-i="${i}">${esc(t)}</button>`).join("")}</div>`;
+      h += `<div class="row" style="justify-content:center"><button class="btn" data-act="cleartiles">Clear</button><button class="btn primary" data-act="checkorder" ${S.placed.length ? "" : "disabled"}>Check</button></div>`;
+    }
+  } else if (q.kind === "input") {
+    h += `<form data-form="num" class="stack"><input class="numin" id="numin" inputmode="decimal" autocomplete="off" placeholder="${esc(q.placeholder)}" value="${esc(S.input)}" ${S.answered ? "disabled" : ""}>${S.answered ? "" : `<button class="btn primary block" type="submit">Check</button>`}</form>`;
+  }
+
+  if (S.answered) {
+    let why = q.why || "";
+    if (q.whys && S.sel !== q.answer && S.sel != null) why = q.whys[S.sel] || why;
+    if (q.kind === "input" && !S.ok) why = `Answer: <b>${esc(q.answerText)}</b>. ` + esc(why); else why = esc(why);
+    if (q.kind === "order" && !S.ok) why = `You built: <span class="hz">${esc(S.placed.map(i => q.tiles[i]).join(""))}</span>` + (why ? "<br>" + why : "");
+    h += `<div class="feedback ${S.ok ? "ok" : "no"}"><div class="verdict">${S.ok ? "对了！ Correct" : "不对 Not quite"}</div>${revealBlock(q)}${why ? `<div class="why">${why}</div>` : ""}${q.pattern ? `<div><button class="btn sm ghost" data-act="gopen" data-id="${q.pattern.id}">Review: ${esc(q.pattern.name)}</button></div>` : ""}</div>`;
+    h += `<div class="sticky-next"><button class="btn primary block" data-act="next" id="nextbtn">${S.i + 1 >= n ? "See results" : "Next"}</button></div>`;
+  }
+  h += `<div class="kbd-hint">Keys: 1–4 choose · Enter check / next · R replay</div></section>`;
+  return h;
+}
+function viewSummary() {
+  const c = S.res.filter(r => r.ok).length;
+  const word = c === S.res.length ? "太棒了！ Perfect round" : c >= S.res.length - 1 ? "很好！ Great work" : c >= 2 ? "不错 Getting there" : "加油！ Keep going";
+  let h = `<section class="stack"><div class="card stack" style="text-align:center"><div class="eyebrow">${esc(S.title)}</div><div class="hz" style="font-size:44px;color:var(--jade)">${c} / ${S.res.length}</div><div style="font-weight:600">${word}</div><div class="muted" style="font-size:13px">Missed items come back in about 10 minutes. Correct ones space out: 1 day, 3 days, then longer.</div></div>`;
+  h += `<div class="card"><div class="sumlist">` + S.res.map(r => {
+    const t = r.q.reveal || {};
+    return `<div class="sumrow"><span class="mk ${r.ok ? "ok" : "no"}">${r.ok ? "✓" : "✗"}</span><div style="flex:1;min-width:0"><div class="hz" style="font-size:17px">${esc(t.zh || "")}</div><div class="muted" style="font-size:13px">${esc(t.en || "")}</div></div>${t.zh ? spk(t.zh) : ""}</div>`;
+  }).join("") + `</div></div>`;
+  h += `<div class="row"><button class="btn primary" data-act="again">Another round</button><button class="btn" data-act="quit">Done</button></div></section>`;
+  return h;
+}
+
+/* ===================== VIEWS: TABS ===================== */
+const TABS = [["today", "今天", "Today"], ["menu", "菜单", "Menu"], ["listen", "听力", "Listen"], ["grammar", "语法", "Grammar"], ["me", "我", "Progress"]];
+function renderTabs() {
+  $("#tabs").innerHTML = TABS.map(([id, zh, en]) => `<button class="tab" data-act="tab" data-tab="${id}" aria-current="${state.tab === id && !S}"><span class="hz">${zh}</span><small>${en}</small></button>`).join("");
+}
+function modeCard(act, zh, title, sub, prefixes, extra = "") {
+  const due = prefixes ? dueKeys(prefixes).length : 0;
+  return `<button class="mode" data-act="${act}" ${extra}><span class="hz">${zh}</span><b>${esc(title)}</b><span>${esc(sub)}</span>${due ? `<span class="due">${due} due</span>` : ""}</button>`;
+}
+function vToday() {
+  const all = ["LM", "LB", "TN", "G", "MC", "MD", "MW", "OR", "C"];
+  const due = dueKeys(all).length, d = P.days[todayKey()] || { n: 0, c: 0 };
+  const learned = Object.values(P.items).filter(v => v.reps > 0).length;
+  const total = all.reduce((s, p) => s + keysFor(p).length, 0);
+  const date = new Date();
+  const zhDate = `${date.getMonth() + 1}月${date.getDate()}日 星期${"日一二三四五六"[date.getDay()]}`;
+  let h = `<section class="stack">`;
+  h += `<div class="card stack"><div class="hero"><div class="big">${d.n ? "加油" : "你好"}</div><div><div class="eyebrow">${zhDate}</div><h2 style="margin-top:2px">${d.n ? `${d.n} answered today, ${d.n ? Math.round(d.c / d.n * 100) : 0}% right` : "Five questions, about three minutes"}</h2><div class="muted" style="font-size:13.5px">Each round mixes what's due for review with new listening, grammar and menu items. Listening and grammar get the most space.</div></div></div>`;
+  h += `<div class="stats"><div class="stat"><b>${streak()}</b><span>day streak</span></div><div class="stat"><b>${due}</b><span>due now</span></div><div class="stat"><b>${learned}<small class="muted" style="font-size:12px">/${total}</small></b><span>items learned</span></div></div>`;
+  h += `<button class="btn primary block" data-act="today">Start today's round</button></div>`;
+  h += `<div class="section-title"><h3>Jump straight to</h3></div><div class="modes">`;
+  h += modeCard("round", "听", "Listen and understand", "Hear a sentence, pick the meaning", ["LM"], 'data-p="LM" data-title="Listen and understand"');
+  h += modeCard("round", "拼", "Build what you hear", "Tap the words in order", ["LB"], 'data-p="LB" data-title="Build what you hear"');
+  h += modeCard("round", "法", "Grammar mix", "Fill gaps and order words", ["G"], 'data-p="G" data-title="Grammar mix"');
+  h += modeCard("round", "菜", "Read the menu", "Dishes and key characters", ["MD", "MC"], 'data-p="MD,MC" data-title="Menu reading"');
+  h += `</div>`;
+  if (!TTS.voices.length) h += voiceWarning();
+  h += `</section>`;
+  return h;
+}
+function voiceWarning() {
+  return `<div class="warn"><b>No Mandarin voice found on this device.</b> Listening practice needs one. On Windows: Settings › Time &amp; language › Speech › Add voices › Chinese (Simplified). On iPhone and Mac a Chinese voice is usually built in; on Android install Google Text-to-speech with Chinese.</div>`;
+}
+
+/* --- menu tab --- */
+function vMenu() {
+  const views = [["read", "读菜单 Read"], ["drill", "练习 Drills"], ["phrases", "短语 Phrases"], ["scan", "扫描 Scan a menu"], ["waiter", "服务员 Waiter chat"]];
+  let h = `<section class="stack"><div class="seg">${views.map(([id, l]) => `<button class="chip" data-act="mview" data-v="${id}" aria-pressed="${state.menuView === id}">${l}</button>`).join("")}</div>`;
+  h += ({ read: vMenuRead, drill: vMenuDrill, phrases: vPhrases, scan: vScan, waiter: vWaiter })[state.menuView]();
+  return h + `</section>`;
+}
+function vMenuRead() {
+  const st = P.settings;
+  let h = `<div class="row"><label class="sw"><input type="checkbox" id="menuPy" data-set="menuPy" ${st.menuPy ? "checked" : ""}> Pinyin</label><label class="sw"><input type="checkbox" id="menuEn" data-set="menuEn" ${st.menuEn ? "checked" : ""}> English</label><span class="muted" style="font-size:13px">Tap a dish for the breakdown and how to order it.</span></div>`;
+  h += `<div class="menu-sheet"><div class="menu-head"><span class="hz">${RESTAURANT.zh}</span><span class="py muted">${pyHtml(RESTAURANT.py)}</span><span class="muted" style="font-size:12px">${esc(RESTAURANT.en)} · 辣 = spicy</span></div>`;
+  let gi = 0;
+  MENU.forEach(sec => {
+    h += `<div class="msec"><div class="msec-h"><span class="hz">${sec.sec}</span>${st.menuEn ? `<span class="muted" style="font-size:12px">${esc(sec.secEn)}</span>` : ""}</div>`;
+    sec.items.forEach(d => {
+      const idx = gi++; const open = state.openDish === idx;
+      h += `<button class="dish" data-act="dish" data-i="${idx}" aria-expanded="${open}"><div class="dish-line"><span class="hz">${esc(d.zh)}</span>${d.tag ? `<span class="stamp">${d.tag}</span>` : ""}${d.spicy ? `<span class="chili" title="spicy level ${d.spicy}">${"辣".repeat(d.spicy)}</span>` : ""}<span class="lead"></span><span class="price">¥${d.p}<small>/${d.u}</small></span></div>${st.menuPy || st.menuEn ? `<div class="dish-sub">${st.menuPy ? `<span class="py">${pyHtml(d.py)}</span> ` : ""}${st.menuEn ? `<span class="muted">${esc(d.en)}</span>` : ""}</div>` : ""}</button>`;
+      if (open) {
+        const op = orderPhrase(d);
+        h += `<div class="dish-detail"><div class="row"><span class="hz" style="font-size:24px">${esc(d.zh)}</span>${spk(d.zh)}<button class="iconbtn" data-act="slow" data-t="${esc(d.zh)}" aria-label="Play slowly">${ICON.slow}</button></div><div class="py">${pyHtml(d.py)}</div><div><b>${esc(d.en)}</b></div>`;
+        h += `<div class="break">${segment(d.zh).map(([t, w]) => `<span><b class="hz">${esc(t)}</b> ${w ? `<span class="py">${pyHtml(w[1])}</span> ${esc(w[2])}` : ""}</span>`).join("")}</div>`;
+        if (d.note) h += `<div class="note">${esc(d.note)}</div>`;
+        h += `<div class="eyebrow" style="margin-top:4px">How to order it</div><div class="row"><span class="hz" style="font-size:19px">${esc(op.zh)}</span>${spk(op.zh)}</div><div class="py">${pyHtml(op.py)}</div><div class="muted" style="font-size:13px">${esc(d.u)} ${UNITS[d.u] ? "(" + UNITS[d.u][0] + ") = " + UNITS[d.u][2] : ""}. 来 lái is the everyday way to say "bring me".</div></div>`;
+      }
+    });
+    h += `</div>`;
+  });
+  return h + `</div>`;
+}
+function vMenuDrill() {
+  let h = `<div class="modes">`;
+  h += modeCard("round", "肉", "Key menu words", "Meat, cuts, cooking methods, flavours", ["MC"], 'data-p="MC" data-title="Key menu words"');
+  h += modeCard("round", "菜", "Dish names", "Read a dish, pick what it is", ["MD"], 'data-p="MD" data-title="Dish names"');
+  h += modeCard("round", "碗", "Measure words", "碗 瓶 杯 两 笼 when ordering", ["MW"], 'data-p="MW" data-title="Measure words"');
+  if (P.customs.length) h += modeCard("round", "扫", "Your scanned dishes", P.customs.length + " saved from real menus", ["C"], 'data-p="C" data-title="Your scanned dishes"');
+  h += `</div><div class="section-title"><h3>Waiter dialogues</h3><span class="muted" style="font-size:13px">Listen first, read only if stuck</span></div><div class="modes">`;
+  DIALOGUES.forEach((d, s) => { h += modeCard("dialogue", d.zh, d.title, d.steps.length + " exchanges", null, `data-s="${s}"`); });
+  return h + `</div>`;
+}
+function vPhrases() {
+  return PHRASES.map(g => `<div class="card"><h3>${esc(g.g)}</h3>${g.list.map(p => `<div class="phr">${spk(p[0])}<div class="tx"><div class="hz">${esc(p[0])}</div><div class="py" style="font-size:13px">${pyHtml(p[1])}</div><div class="muted" style="font-size:13px">${esc(p[2])}</div></div></div>`).join("")}</div>`).join("");
+}
+function vScan() {
+  const sc = state.scan;
+  if (!SAMPLE) return `<div class="card stack"><h3>Scan a real menu</h3><p class="muted" style="margin:0">This uses Claude to read a menu photo or pasted text and turn it into dishes with pinyin, meanings and how to order. ${STANDALONE ? "Add an Anthropic API key under Progress › Claude features to switch it on." : "It isn't available in this view. Open the page in the Claude app while signed in to use it."}</p></div>`;
+  let h = `<div class="card stack"><h3>Scan a real menu</h3><p class="muted" style="margin:0;font-size:14px">${CAN_IMG ? "Take a photo of a menu, or paste the characters." : "Paste or type the dish names."} You'll get pinyin, what each dish is, the spice level and how to order it. Save any dish to your review deck.</p>`;
+  if (CAN_IMG) h += `<label class="btn" style="align-self:flex-start"><input type="file" accept="image/*" id="scanfile" data-act-change="scanfile" hidden>${sc.file ? "Photo: " + esc(sc.file.name).slice(0, 28) : "Choose or take a photo"}</label>`;
+  h += `<textarea id="scantext" placeholder="例如：鱼香茄子 干锅花菜 酸菜鱼">${esc(sc.text)}</textarea><button class="btn primary" data-act="scan" ${sc.busy ? "disabled" : ""}>${sc.busy ? "Reading the menu…" : "Read it for me"}</button>${sc.err ? `<div class="warn">${esc(sc.err)}</div>` : ""}</div>`;
+  if (sc.items.length) {
+    h += `<div class="card">` + sc.items.map((it, i) => {
+      const saved = P.customs.some(c => c.zh === it.zh);
+      return `<div class="scan-card"><div class="row"><span class="hz">${esc(it.zh)}</span>${spk(it.zh)}${+it.spicy ? `<span class="chili">${"辣".repeat(Math.min(3, +it.spicy))}</span>` : ""}${it.price ? `<span class="price" style="margin-left:auto">${esc(it.price)}</span>` : ""}</div><div class="py">${pyHtml(it.py)}</div><div><b>${esc(it.en)}</b> <span class="muted">${esc(it.what || "")}</span></div>${it.order ? `<div class="row" style="font-size:14px"><span class="muted">Order:</span><span class="hz" style="font-size:16px">${esc(it.order)}</span>${spk(it.order)}<span class="py muted" style="font-size:12px">${pyHtml(it.order_py || "")}</span></div>` : ""}<div><button class="btn sm" data-act="savedish" data-i="${i}" ${saved ? "disabled" : ""}>${saved ? "In your review deck" : "Add to review"}</button></div></div>`;
+    }).join("") + `</div>`;
+  }
+  return h;
+}
+async function runScan() {
+  const sc = state.scan; const t = ($("#scantext") || {}).value || ""; sc.text = t;
+  if (!t.trim() && !sc.file) { sc.err = CAN_IMG ? "Add a photo or some menu text first." : "Type or paste some menu text first."; render(); return; }
+  sc.busy = true; sc.err = ""; render();
+  const prompt = `Help an HSK 2 Mandarin learner read and order from a Chinese menu. ${sc.file ? "The attached image is a photo of a menu." : ""} ${t.trim() ? "Menu text: " + t.trim() : ""}
+List up to 20 dishes or drinks (skip section headings). Reply with only a JSON array, one object per item:
+{"zh":"name in simplified characters","py":"pinyin with tone marks, one space between syllables","en":"short English name","what":"main ingredients and cooking method, under 15 words","spicy":0,"price":"price as shown, or empty","order":"natural way to order one, e.g. 来一份宫保鸡丁","order_py":"pinyin of order with tone marks"}
+spicy is 0 to 3.`;
+  try {
+    const opts = sc.file ? { images: sc.file } : {};
+    const res = await SAMPLE.json(prompt, opts);
+    sc.items = (Array.isArray(res) ? res : []).filter(x => x && x.zh).slice(0, 20);
+    if (!sc.items.length) sc.err = "No dishes found. Try a clearer photo or paste the characters.";
+  } catch (e) { sc.err = errText(e); }
+  sc.busy = false; render();
+}
+
+/* waiter chat */
+function chatInit() {
+  const greet = { zh: "欢迎光临！请问几位？", py: "huān yíng guāng lín! qǐng wèn jǐ wèi?", en: "Welcome! How many people?", fix: null };
+  const rules = `You are a friendly waiter (服务员) at ${RESTAURANT.zh}, a casual restaurant in China. The customer is Joel, an Australian learner at about HSK 2 whose weakest skills are listening and grammar. Menu with prices in yuan: ${MENU_TEXT}.
+Rules:
+- Stay in character. Speak natural, simple Mandarin (HSK 1 to 3 words), one or two short sentences per turn, the way a real waiter talks.
+- The customer may write characters, pinyin, or English when stuck. Understand them and keep the scene going in Chinese.
+- If the customer's Chinese has a grammar, word-order, measure word or word-choice mistake, or they used English or pinyin, put a natural version in "fix". If what they said was fine, "fix" is null.
+- Move the scene along: seating, ordering, drinks, spice level, food arriving, paying by WeChat or Alipay, takeaway boxes.
+Reply with only JSON: {"zh":"...","py":"pinyin with tone marks, one space between syllables","en":"English translation","fix":null or {"better":"natural Chinese","better_py":"pinyin","why":"one short sentence in English"}}`;
+  state.chat = { turns: [{ role: "user", content: rules + "\n\nThe customer has just walked in. Greet them." }, { role: "assistant", content: JSON.stringify(greet) }], msgs: [{ who: "w", ...greet }], busy: false, listen: true, shown: {}, err: "" };
+}
+function vWaiter() {
+  if (!SAMPLE) return `<div class="card stack"><h3>Order from a waiter</h3><p class="muted" style="margin:0">A live roleplay where Claude plays the waiter, speaks every line aloud and quietly corrects your Chinese. ${STANDALONE ? "Add an Anthropic API key under Progress › Claude features to switch it on." : "It isn't available in this view. Open the page in the Claude app while signed in to use it."} The scripted dialogues under Drills work everywhere.</p></div>`;
+  const c = state.chat;
+  if (!c) return `<div class="card stack"><h3>Order from a waiter</h3><p class="muted" style="margin:0;font-size:14px">Claude plays the waiter at ${RESTAURANT.zh} using the practice menu. Each line is spoken aloud with the text hidden, so you listen first. Reply in characters, pinyin, or English if you're stuck; corrections appear under your message.</p><button class="btn primary" data-act="chatstart">Walk in</button></div>`;
+  let h = `<div class="row"><label class="sw"><input type="checkbox" id="chatlisten" data-act-change="chatlisten" ${c.listen ? "checked" : ""}> Listen first (tap a line to see it)</label><button class="btn sm ghost" data-act="chatreset" style="margin-left:auto">Start over</button></div><div class="chat" id="chat">`;
+  c.msgs.forEach((m, i) => {
+    if (m.who === "w") {
+      const hide = c.listen && !c.shown[i];
+      h += `<div class="msg w"><div class="row" style="gap:6px">${spk(m.zh)}<button class="iconbtn" data-act="slow" data-t="${esc(m.zh)}" aria-label="Play slowly">${ICON.slow}</button></div><div class="${hide ? "hidden-text" : ""}" data-act="chatshow" data-i="${i}"><div class="hz">${esc(m.zh)}</div><div class="py" style="font-size:13px">${pyHtml(m.py)}</div><div class="muted" style="font-size:13px">${esc(m.en)}</div></div></div>`;
+    } else {
+      h += `<div class="msg me"><div class="sc">${esc(m.text)}</div>${m.fix ? `<div class="fix"><div class="row" style="gap:6px"><span class="hz" style="font-size:16px">${esc(m.fix.better)}</span>${spk(m.fix.better)}</div><div class="py" style="font-size:12px">${pyHtml(m.fix.better_py || "")}</div><div class="muted">${esc(m.fix.why || "")}</div></div>` : ""}</div>`;
+    }
+  });
+  if (c.busy) h += `<div class="msg w pulse"><span class="muted">服务员正在想… (thinking)</span></div>`;
+  h += `</div>${c.err ? `<div class="warn">${esc(c.err)}</div>` : ""}<form data-form="chat" class="stack" style="gap:8px"><textarea id="chatin" placeholder="用中文回答… e.g. 两位。" ${c.busy ? "disabled" : ""}></textarea><button class="btn primary" type="submit" ${c.busy ? "disabled" : ""}>Send</button></form>`;
+  return h;
+}
+async function chatSend(text) {
+  const c = state.chat; if (!text.trim() || c.busy) return;
+  const me = { who: "me", text: text.trim(), fix: null };
+  c.msgs.push(me); c.turns.push({ role: "user", content: text.trim() });
+  c.busy = true; c.err = ""; render();
+  const turns = [c.turns[0], ...c.turns.slice(1).slice(-16)];
+  try {
+    const r = await SAMPLE.json(turns, { modelTier: "quick", cache: false });
+    if (!r || !r.zh) throw { code: "invalid_json" };
+    me.fix = r.fix && r.fix.better ? r.fix : null;
+    c.turns.push({ role: "assistant", content: JSON.stringify(r) });
+    c.msgs.push({ who: "w", zh: r.zh, py: r.py || "", en: r.en || "" });
+    c.busy = false; render(); speak(r.zh);
+  } catch (e) {
+    c.turns.pop(); c.busy = false; c.err = errText(e); render();
+  }
+  const el = $("#chat"); if (el) el.lastElementChild && el.lastElementChild.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+
+/* --- listen tab --- */
+function vListen() {
+  let h = `<section class="stack">`;
+  if (!TTS.voices.length) h += voiceWarning();
+  h += `<div class="card stack"><div class="row" style="justify-content:space-between"><div><h3>Speaking speed</h3><div class="muted" style="font-size:13px">Start slow, then push toward 1.0 as you improve.</div></div><div class="seg">${[0.7, 0.85, 1].map(r => `<button class="chip" data-act="rate" data-r="${r}" aria-pressed="${Math.abs(P.settings.rate - r) < 0.01}">${r}×</button>`).join("")}</div></div></div>`;
+  h += `<div class="modes">`;
+  h += modeCard("round", "听", "Listen and understand", "Audio only, choose the meaning", ["LM"], 'data-p="LM" data-title="Listen and understand"');
+  h += modeCard("round", "拼", "Build what you hear", "Dictation with word tiles", ["LB"], 'data-p="LB" data-title="Build what you hear"');
+  h += modeCard("round", "声", "Tones", "Hear a word, name its tones", ["TN"], 'data-p="TN" data-title="Tones"');
+  h += modeCard("round", "钱", "Prices, times, numbers", "Type what you hear", null, 'data-p="NUM" data-title="Prices, times, numbers"');
+  h += modeCard("round", "服", "What did the waiter say?", "Restaurant lines, text hidden", ["OR"], 'data-p="OR" data-title="Waiter listening"');
+  h += `</div>`;
+  h += `<div class="card stack"><div class="row" style="justify-content:space-between"><div><h3>Sentence library</h3><div class="muted" style="font-size:13px">Play, guess, then tap to check. Good for shadowing: repeat each line out loud.</div></div><button class="btn sm" data-act="lib">${state.libOpen ? "Hide" : "Open"}</button></div>`;
+  if (state.libOpen) h += LISTEN.map((s, i) => { const zh = joinZh(s[0]); const sh = state.libShown[i]; return `<div class="phr">${spk(zh)}<button class="iconbtn" data-act="slow" data-t="${esc(zh)}" aria-label="Play slowly">${ICON.slow}</button><div class="tx ${sh ? "" : "hidden-text"}" data-act="libshow" data-i="${i}"><div class="hz">${esc(zh)}</div><div class="py" style="font-size:13px">${pyHtml(s[1])}</div><div class="muted" style="font-size:13px">${esc(s[2])}</div></div></div>`; }).join("");
+  return h + `</div></section>`;
+}
+
+/* --- grammar tab --- */
+function mastery(g) { const ks = g.d.map((_, j) => `G:${g.id}:${j}`); return ks.reduce((s, k) => s + Math.min(3, (P.items[k] || {}).reps || 0), 0) / (3 * ks.length); }
+function vGrammar() {
+  if (state.gOpen) return vPattern(GRAMMAR.find(g => g.id === state.gOpen));
+  let h = `<section class="stack"><div class="card stack"><h3>Grammar mix</h3><div class="muted" style="font-size:14px">Five drills from patterns that are due or new: gap fills and word order. Tap a pattern below to study it first.</div><button class="btn primary" data-act="round" data-p="G" data-title="Grammar mix">Start grammar round${dueKeys(["G"]).length ? ` · ${dueKeys(["G"]).length} due` : ""}</button></div><div class="glist">`;
+  GRAMMAR.forEach(g => { const m = mastery(g); h += `<button class="gitem" data-act="gopen" data-id="${g.id}"><span class="hz">${esc(g.zh)}</span><span><b>${esc(g.name)}</b><small>HSK ${g.hsk} · ${esc(g.s)}</small></span><span class="mini"><span class="bar"><i style="width:${Math.round(m * 100)}%"></i></span></span></button>`; });
+  return h + `</div></section>`;
+}
+function vPattern(g) {
+  if (!g) { state.gOpen = null; return vGrammar(); }
+  const gc = state.gcheck;
+  let h = `<section class="stack"><div class="row"><button class="iconbtn" data-act="gback" aria-label="Back to patterns">${ICON.back}</button><span class="eyebrow">HSK ${g.hsk} pattern</span></div>`;
+  h += `<div class="card stack"><div class="row"><span class="hz" style="font-size:34px;color:var(--jade)">${esc(g.zh)}</span><h2>${esc(g.name)}</h2></div><div class="structure">${esc(g.s)}</div><p style="margin:0">${esc(g.x)}</p></div>`;
+  h += `<div class="card"><h3>Examples</h3>${g.ex.map(e => { const zh = joinZh(e[0]); return `<div class="ex">${spk(zh)}<div class="tx"><div class="hz">${esc(zh)}</div><div class="py" style="font-size:13px">${pyHtml(e[1])}</div><div class="muted" style="font-size:13px">${esc(e[2])}</div></div></div>`; }).join("")}</div>`;
+  h += `<button class="btn primary block" data-act="gdrill" data-id="${g.id}">Drill this pattern (${g.d.length} questions)</button>`;
+  if (SAMPLE) h += `<div class="card stack"><h3>Write your own sentence</h3><div class="muted" style="font-size:14px">Use ${esc(g.zh)} in a sentence about your life. Claude checks it and suggests a better version.</div><textarea id="gtext" placeholder="Write in characters or pinyin">${esc(gc.text || "")}</textarea><button class="btn" data-act="gcheck" data-id="${g.id}" ${gc.busy ? "disabled" : ""}>${gc.busy ? "Checking…" : "Check my sentence"}</button>${gc.err ? `<div class="warn">${esc(gc.err)}</div>` : ""}${gc.out ? `<div class="note out" id="gout">${esc(gc.out)}</div>` : ""}</div>`;
+  return h + `</section>`;
+}
+async function gCheck(g) {
+  const gc = state.gcheck; const t = ($("#gtext") || {}).value || ""; gc.text = t;
+  if (!t.trim()) { gc.err = "Write a sentence first."; render(); return; }
+  gc.busy = true; gc.err = ""; gc.out = ""; render();
+  const prompt = `You are a patient Mandarin tutor. The learner (about HSK 2, Australian, weakest at grammar and listening) is practising the pattern "${g.name}" (${g.s}). They wrote: "${t.trim()}"
+Reply in plain text, under 90 words, no markdown, using exactly these lines:
+Verdict: Natural / Understandable but off / Incorrect
+Better: <corrected or more natural sentence in simplified characters> (<pinyin with tone marks>)
+Why: <one or two short sentences in English>
+Try next: <one new English sentence for them to translate using the same pattern>`;
+  try {
+    const r = await SAMPLE(prompt, { onText: ({ text }) => { gc.out = text; const el = $("#gout"); if (el) el.textContent = text; else render(); } });
+    gc.out = r.text;
+  } catch (e) { gc.err = errText(e); if (e && e.text) gc.out = e.text; }
+  gc.busy = false; render();
+}
+
+/* --- progress tab --- */
+function vMe() {
+  const area = k => { const a = P.area[k] || { n: 0, c: 0 }; return { n: a.n, pct: a.n ? Math.round(a.c / a.n * 100) : 0 }; };
+  const days = []; const d = new Date(); d.setDate(d.getDate() - 13);
+  for (let i = 0; i < 14; i++) { days.push({ k: dkey(d), lab: "日一二三四五六"[d.getDay()], v: (P.days[dkey(d)] || { n: 0 }).n }); d.setDate(d.getDate() + 1); }
+  const max = Math.max(5, ...days.map(x => x.v));
+  let h = `<section class="stack"><div class="card stack"><h3>Last 14 days</h3><div style="display:grid;grid-template-columns:repeat(14,1fr);gap:4px;align-items:end;height:110px">`;
+  h += days.map(x => `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end"><span style="font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums">${x.v || ""}</span><span style="width:100%;max-width:18px;border-radius:4px 4px 0 0;background:${x.v ? "var(--jade)" : "var(--line)"};height:${Math.max(3, Math.round(x.v / max * 70))}px"></span><span class="hz" style="font-size:11px;color:var(--muted)">${x.lab}</span></div>`).join("");
+  h += `</div><div class="stats"><div class="stat"><b>${streak()}</b><span>day streak</span></div><div class="stat"><b>${Object.values(P.items).filter(v => v.reps > 0).length}</b><span>items learned</span></div><div class="stat"><b>${Object.values(P.days).reduce((s, x) => s + x.n, 0)}</b><span>answers</span></div></div></div>`;
+  h += `<div class="card stack"><h3>Accuracy by skill</h3>${[["listen", "听力 Listening"], ["grammar", "语法 Grammar"], ["menu", "菜单 Menu"]].map(([k, l]) => { const a = area(k); return `<div class="stack" style="gap:4px"><div class="row" style="justify-content:space-between"><span>${l}</span><span class="muted" style="font-variant-numeric:tabular-nums">${a.n ? a.pct + "% of " + a.n : "not started"}</span></div><div class="bar"><i style="width:${a.pct}%"></i></div></div>`; }).join("")}</div>`;
+  h += `<div class="card stack"><h3>Voice and display</h3>`;
+  if (TTS.voices.length) h += `<label class="stack" style="gap:4px"><span class="muted" style="font-size:13px">Chinese voice</span><select id="voice" data-set="voice"><option value="">Automatic</option>${TTS.voices.map(v => `<option value="${esc(v.name)}" ${P.settings.voice === v.name ? "selected" : ""}>${esc(v.name)} (${esc(v.lang)})</option>`).join("")}</select></label>`;
+  else h += voiceWarning();
+  h += `<label class="stack" style="gap:4px"><span class="muted" style="font-size:13px">Speed: <b id="ratev">${P.settings.rate.toFixed(2)}×</b></span><input type="range" id="rate" min="0.5" max="1.2" step="0.05" value="${P.settings.rate}" data-set="rate"></label>`;
+  h += `<div class="row"><button class="btn sm" data-act="say" data-t="你好，我是你的中文老师。我们开始吧！">Test the voice</button></div>`;
+  h += `<label class="sw"><input type="checkbox" id="pinyin" data-set="pinyin" ${P.settings.pinyin ? "checked" : ""}> Show pinyin on answer options before I answer</label></div>`;
+  if (STANDALONE) h += `<div class="card stack"><h3>Claude features</h3><div class="muted" style="font-size:14px">Menu scanning, the waiter chat and sentence checking need an Anthropic API key (from console.anthropic.com). It's stored only in this browser and sent only to Anthropic. Usage is billed to your API account.</div><input type="text" id="apikey" placeholder="sk-ant-…" value="${esc(API.key ? API.key.slice(0, 10) + "…" + API.key.slice(-4) : "")}" autocomplete="off"><input type="text" id="apimodel" value="${esc(API.model)}" aria-label="Model name"><div class="row"><button class="btn sm primary" data-act="apisave">Save</button>${API.key ? `<button class="btn sm ghost" data-act="apiclear">Remove key</button><span class="muted" style="font-size:13px">Key saved</span>` : ""}</div></div>`;
+  h += `<div class="card stack"><h3>Your data</h3><div class="muted" style="font-size:14px">${store.mode === "cloud" ? "Progress is saved to your Claude account, so it follows you between your phone and computer." : (STANDALONE ? "Progress is saved in this browser only. Clearing browser data erases it, and it won't sync to other devices." : "Progress is saved in this browser only. Open the page signed in to the Claude app to save it to your account.")}</div>`;
+  h += state.resetArm ? `<div class="row"><span>Erase all progress?</span><button class="btn sm" data-act="resetyes" style="border-color:var(--bad);color:var(--bad)">Yes, erase</button><button class="btn sm" data-act="resetno">Keep it</button></div>` : `<div><button class="btn sm ghost" data-act="reset">Reset progress</button></div>`;
+  return h + `</div></section>`;
+}
+
+const VIEWS = { today: vToday, menu: vMenu, listen: vListen, grammar: vGrammar, me: vMe };
+function render() {
+  renderTabs();
+  $("#main").innerHTML = S ? (S.summary ? viewSummary() : viewQuiz()) : VIEWS[state.tab]();
+  if (S && !S.summary && S.qs[S.i].kind === "input" && !S.answered) { const el = $("#numin"); if (el) el.focus({ preventScroll: true }); }
+}
+
+/* ===================== EVENTS ===================== */
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  const a = el.dataset.act; const q = S && !S.summary ? S.qs[S.i] : null;
+  switch (a) {
+    case "tab": S = null; state.tab = el.dataset.tab; state.gOpen = null; render(); window.scrollTo(0, 0); break;
+    case "say": speak(el.dataset.t); break;
+    case "slow": speak(el.dataset.t, true); break;
+    case "replay": q && speak(q.audio); break;
+    case "replay-slow": q && speak(q.audio, true); break;
+    case "showtext": S.showText = true; render(); break;
+    case "hint": S.hint = true; render(); break;
+    case "choose": if (q && !S.answered) { S.sel = +el.dataset.i; answer(S.sel === q.answer); } break;
+    case "tile": if (q && !S.answered) { S.placed.push(+el.dataset.i); render(); } break;
+    case "untile": if (q && !S.answered) { S.placed.splice(+el.dataset.pos, 1); render(); } break;
+    case "cleartiles": S.placed = []; render(); break;
+    case "checkorder": if (S.placed.length) checkOrder(); break;
+    case "next": next(); break;
+    case "quit": S = null; render(); window.scrollTo(0, 0); break;
+    case "again": if (S && S.again) S.again(); break;
+    case "today": { const go = () => startRound("Today's round", todayKeys(), go); go(); break; }
+    case "round": { const ps = el.dataset.p.split(","), t = el.dataset.title; const go = () => startRound(t, roundKeys(ps), go); go(); break; }
+    case "dialogue": { const s = +el.dataset.s; const go = () => startRound(DIALOGUES[s].title, DIALOGUES[s].steps.map((_, j) => `OR:${s}:${j}`), go); go(); break; }
+    case "gdrill": { const g = GRAMMAR.find(x => x.id === el.dataset.id); const go = () => startRound(g.name, shuffle(g.d.map((_, j) => `G:${g.id}:${j}`)), go); go(); break; }
+    case "gopen": S = null; state.tab = "grammar"; state.gOpen = el.dataset.id; state.gcheck = { busy: false, out: "", err: "", text: "" }; render(); window.scrollTo(0, 0); break;
+    case "gback": state.gOpen = null; render(); break;
+    case "gcheck": gCheck(GRAMMAR.find(x => x.id === el.dataset.id)); break;
+    case "mview": state.menuView = el.dataset.v; render(); break;
+    case "dish": { const i = +el.dataset.i; state.openDish = state.openDish === i ? null : i; render(); if (state.openDish != null) speak(DISHES[i].zh); break; }
+    case "scan": runScan(); break;
+    case "savedish": { const it = state.scan.items[+el.dataset.i]; if (it && !P.customs.some(c => c.zh === it.zh)) { P.customs.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), zh: it.zh, py: it.py || "", en: it.en || "", what: it.what || "" }); save(); render(); } break; }
+    case "chatstart": chatInit(); render(); speak(state.chat.msgs[0].zh); break;
+    case "chatreset": state.chat = null; render(); break;
+    case "chatshow": if (state.chat) { state.chat.shown[+el.dataset.i] = true; render(); } break;
+    case "rate": P.settings.rate = +el.dataset.r; save(); render(); speak("这个速度可以吗？"); break;
+    case "lib": state.libOpen = !state.libOpen; render(); break;
+    case "libshow": state.libShown[+el.dataset.i] = true; render(); break;
+    case "apisave": {
+      const k = ($("#apikey") || {}).value.trim(), m = ($("#apimodel") || {}).value.trim();
+      if (k && !k.includes("…")) API.key = k;
+      if (m) API.model = m;
+      try { localStorage.setItem("xiaolaoshi.apikey", API.key); localStorage.setItem("xiaolaoshi.model", API.model); } catch (e) { }
+      if (API.key) { SAMPLE = makeApiSample(); CAN_IMG = true; }
+      render(); break;
+    }
+    case "apiclear": API.key = ""; SAMPLE = null; CAN_IMG = false; try { localStorage.removeItem("xiaolaoshi.apikey"); } catch (e) { } render(); break;
+    case "reset": state.resetArm = true; render(); break;
+    case "resetno": state.resetArm = false; render(); break;
+    case "resetyes": { const st = P.settings; P = DEFAULT(); P.settings = st; state.resetArm = false; save(); pushRemote(); render(); break; }
+  }
+});
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.dataset.set) {
+    const k = t.dataset.set;
+    P.settings[k] = t.type === "checkbox" ? t.checked : k === "rate" ? +t.value : t.value;
+    save(); render(); if (k === "voice") speak("你好");
+  }
+  if (t.dataset.actChange === "scanfile") { state.scan.file = t.files && t.files[0] || null; state.scan.text = ($("#scantext") || {}).value || ""; render(); }
+  if (t.dataset.actChange === "chatlisten" && state.chat) { state.chat.listen = t.checked; render(); }
+});
+document.addEventListener("input", e => {
+  if (e.target.id === "rate") { const v = $("#ratev"); if (v) v.textContent = (+e.target.value).toFixed(2) + "×"; }
+  if (e.target.id === "numin" && S) S.input = e.target.value;
+});
+document.addEventListener("submit", e => {
+  e.preventDefault();
+  const f = e.target.dataset.form;
+  if (f === "num" && S && !S.answered) { const v = ($("#numin") || {}).value || ""; if (!v.trim()) return; S.input = v; answer(S.qs[S.i].check(v)); }
+  if (f === "chat") { const v = ($("#chatin") || {}).value || ""; chatSend(v); }
+});
+document.addEventListener("keydown", e => {
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (e.key === "Enter" && tag === "textarea" && e.target.id === "chatin" && !e.shiftKey) { e.preventDefault(); chatSend(e.target.value); return; }
+  if (!S || S.summary) return;
+  if (tag === "textarea" || (tag === "input" && e.target.id !== "numin") || tag === "select") return;
+  const q = S.qs[S.i];
+  if (S.answered && e.key === "Enter") { e.preventDefault(); next(); return; }
+  if (!S.answered && q.kind === "choice" && /^[1-4]$/.test(e.key) && +e.key <= q.opts.length) { S.sel = +e.key - 1; answer(S.sel === q.answer); return; }
+  if (!S.answered && q.kind === "order" && e.key === "Enter" && S.placed.length) { checkOrder(); return; }
+  if ((e.key === "r" || e.key === "R") && tag !== "input" && q.audio) speak(q.audio);
+});
+
+/* ===================== BOOT ===================== */
+setSync("local");
+render();
+initCloud();
+
+</script>
+</body>
+</html>
