@@ -232,6 +232,15 @@ body.shiftpy .py{display:none}
 .xl-tip .chars{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;align-items:baseline}
 .xl-tip .chars .hz{font-size:16px}
 .xl-tip .chars .cur{color:var(--jade)}
+
+/* Drag tiles + typed answers */
+.quiz .tile{touch-action:none;user-select:none;-webkit-user-select:none}
+.tile.drag-src{opacity:.3}
+.tile-ghost{position:fixed;z-index:9999;pointer-events:none;transform:translate(-50%,-50%) scale(1.06);box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:.95}
+.drop-caret{position:fixed;z-index:9998;width:3px;border-radius:2px;background:var(--jade);pointer-events:none}
+.typeans{display:flex;gap:8px;align-items:center}
+.typeans input{flex:1;min-width:0;font-family:var(--f-sc);font-size:18px;padding:9px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.typeans-lbl{font-size:12px;color:var(--muted);text-align:center;margin:2px 0 -4px}
 </style>
 </head>
 <body>
@@ -1069,7 +1078,7 @@ function answer(ok) {
   if (!q.audio && q.reveal && q.reveal.zh) setTimeout(() => speak(q.reveal.zh), 200);
 }
 function next() {
-  S.i++; Object.assign(S, { answered: false, sel: null, placed: [], input: "", showText: false, hint: false });
+  S.i++; Object.assign(S, { answered: false, sel: null, placed: [], input: "", showText: false, hint: false, typedAns: "", typeDraft: "" });
   if (S.i >= S.qs.length) S.summary = true;
   render(); window.scrollTo(0, 0); autoplay();
 }
@@ -1113,11 +1122,13 @@ function viewQuiz() {
       else inner = `<span class="hz">${esc(o.zh)}</span>${o.py && (P.settings.pinyin || S.answered) ? `<span class="py">${pyHtml(o.py)}</span>` : ""}${S.answered && q.optEn ? `<span class="muted" style="font-size:13px">${esc(q.optEn[k])}</span>` : ""}`;
       return `<button class="${cls}" data-act="choose" data-i="${k}" ${S.answered ? "disabled" : ""}><span class="k">${k + 1}</span><span class="ot">${inner}</span></button>`;
     }).join("") + `</div>`;
+    if (!S.answered && typableChoice(q)) h += typeBox("Or type your answer (characters or pinyin)");
   } else if (q.kind === "order") {
-    h += `<div class="tiles answerline">${S.placed.map((ti, pos) => `<button class="tile" data-act="untile" data-pos="${pos}" ${S.answered ? "disabled" : ""}>${esc(q.tiles[ti])}</button>`).join("") || `<span class="muted" style="align-self:center">Tap the words below in order</span>`}</div>`;
+    h += `<div class="tiles answerline">${S.placed.map((ti, pos) => `<button class="tile" data-act="untile" data-pos="${pos}" ${S.answered ? "disabled" : ""}>${esc(q.tiles[ti])}</button>`).join("") || `<span class="muted" style="align-self:center">Tap or drag the words below in order</span>`}</div>`;
     if (!S.answered) {
       h += `<div class="tiles">${q.tiles.map((t, i) => `<button class="tile ${S.placed.includes(i) ? "used" : ""}" data-act="tile" data-i="${i}">${esc(t)}</button>`).join("")}</div>`;
       h += `<div class="row" style="justify-content:center"><button class="btn" data-act="cleartiles">Clear</button><button class="btn primary" data-act="checkorder" ${S.placed.length ? "" : "disabled"}>Check</button></div>`;
+      h += typeBox("Or type the sentence (characters or pinyin)");
     }
   } else if (q.kind === "input") {
     h += `<form data-form="num" class="stack"><input class="numin" id="numin" inputmode="decimal" autocomplete="off" placeholder="${esc(q.placeholder)}" value="${esc(S.input)}" ${S.answered ? "disabled" : ""}>${S.answered ? "" : `<button class="btn primary block" type="submit">Check</button>`}</form>`;
@@ -1127,7 +1138,8 @@ function viewQuiz() {
     let why = q.why || "";
     if (q.whys && S.sel !== q.answer && S.sel != null) why = q.whys[S.sel] || why;
     if (q.kind === "input" && !S.ok) why = `Answer: <b>${esc(q.answerText)}</b>. ` + esc(why); else why = esc(why);
-    if (q.kind === "order" && !S.ok) why = `You built: <span class="hz">${esc(S.placed.map(i => q.tiles[i]).join(""))}</span>` + (why ? "<br>" + why : "");
+    if (!S.ok && S.typedAns) why = `You typed: <span class="hz">${esc(S.typedAns)}</span>` + (why ? "<br>" + why : "");
+    else if (q.kind === "order" && !S.ok) why = `You built: <span class="hz">${esc(S.placed.map(i => q.tiles[i]).join(""))}</span>` + (why ? "<br>" + why : "");
     h += `<div class="feedback ${S.ok ? "ok" : "no"}"><div class="verdict">${S.ok ? "对了！ Correct" : "不对 Not quite"}</div>${revealBlock(q)}${why ? `<div class="why">${why}</div>` : ""}${q.pattern ? `<div><button class="btn sm ghost" data-act="gopen" data-id="${q.pattern.id}">Review: ${esc(q.pattern.name)}</button></div>` : ""}</div>`;
     h += `<div class="sticky-next"><button class="btn primary block" data-act="next" id="nextbtn">${S.i + 1 >= n ? "See results" : "Next"}</button></div>`;
   }
@@ -1446,12 +1458,14 @@ document.addEventListener("change", e => {
 document.addEventListener("input", e => {
   if (e.target.id === "rate") { const v = $("#ratev"); if (v) v.textContent = (+e.target.value).toFixed(2) + "×"; }
   if (e.target.id === "numin" && S) S.input = e.target.value;
+  if (e.target.id === "typein" && S) { S.typeDraft = e.target.value; S.typeFor = S.i; }
 });
 document.addEventListener("submit", e => {
   e.preventDefault();
   const f = e.target.dataset.form;
   if (f === "num" && S && !S.answered) { const v = ($("#numin") || {}).value || ""; if (!v.trim()) return; S.input = v; answer(S.qs[S.i].check(v)); }
   if (f === "chat") { const v = ($("#chatin") || {}).value || ""; chatSend(v); }
+  if (f === "type" && S && !S.answered) { const v = ($("#typein") || {}).value || ""; checkTyped(v); }
 });
 document.addEventListener("keydown", e => {
   const tag = (e.target.tagName || "").toLowerCase();
@@ -1690,6 +1704,7 @@ function hovShow(hit) {
 }
 function hovTick() {
   HOV.raf = 0;
+  if (DRG.active) return;
   const hit = hitChar(HOV.x, HOV.y);
   if (!hit) { if (HOV.key) hovClear(); return; }
   if (!HOV.dict) { loadDict().then(d => { if (d) hovTick(); }); return; }
@@ -1705,6 +1720,117 @@ if (CAN_HOVER) {
   document.addEventListener("keyup", e => { if (e.key === "Shift") setTimeout(() => { hovClear(); hovTick(); }, 30); });
   setTimeout(loadDict, 2500);
 }
+
+/* ===================== TYPED ANSWERS ===================== */
+/* Word-order and Chinese multiple-choice questions accept a typed answer,
+   in characters (any IME) or in pinyin (tone marks, tone numbers or no tones). */
+function typableChoice(q) { return q && q.kind === "choice" && q.opts.length && q.opts.every(o => o && typeof o === "object" && o.zh); }
+function typeBox(label) {
+  const v = S.typeFor === S.i ? (S.typeDraft || "") : "";
+  return `<div class="typeans-lbl">${esc(label)}</div><form data-form="type" class="typeans"><input id="typein" autocomplete="off" autocapitalize="off" spellcheck="false" lang="zh-CN" placeholder="e.g. 你好 or ni hao" value="${esc(v)}"><button class="btn primary" type="submit">Check</button></form>`;
+}
+const onlyHan = s => String(s || "").replace(/[^\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/g, "");
+const plainPy = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/u:/g, "u").replace(/v/g, "u").replace(/[^a-z]/g, "");
+async function pyKey(zh) {
+  const lib = await loadPinyinLib();
+  if (!lib) return null;
+  try { return plainPy(lib.pinyin(onlyHan(zh), { toneType: "none", type: "array" }).join("")); } catch (e) { return null; }
+}
+async function typedMatches(typed, target) {
+  if (/[\u3400-\u9fff]/.test(typed)) return onlyHan(typed) === onlyHan(target);
+  const t = plainPy(typed); if (!t) return false;
+  const k = await pyKey(target);
+  return k != null && t === k;
+}
+async function checkTyped(v) {
+  const typed = String(v || "").trim(); if (!typed || !S || S.answered) return;
+  const q = S.qs[S.i], idx = S.i;
+  if (q.kind === "order") {
+    let hit = null;
+    for (const a of q.answers) if (await typedMatches(typed, a.join(""))) { hit = a; break; }
+    if (!S || S.i !== idx || S.answered) return;
+    if (hit) { /* line the tiles up the same way so the screen matches */
+      const used = new Set(); S.placed = hit.map(tok => { const i = q.tiles.findIndex((t, k) => t === tok && !used.has(k)); used.add(i); return i; }).filter(i => i >= 0);
+      S.typedAns = ""; answer(true);
+    } else { S.typedAns = typed; answer(false); }
+    return;
+  }
+  if (typableChoice(q)) {
+    let sel = null;
+    for (let k = 0; k < q.opts.length; k++) if (await typedMatches(typed, q.opts[k].zh)) { sel = k; break; }
+    if (!S || S.i !== idx || S.answered) return;
+    S.sel = sel; S.typedAns = sel === q.answer ? "" : typed; answer(sel === q.answer);
+  }
+}
+
+/* ===================== DRAG TILES ===================== */
+/* Drag a tile within the answer line to reorder it, drag a tile from the pool into a spot,
+   or drag a placed tile off the line to remove it. A plain tap still works as before. */
+const DRG = { on: false, active: false };
+function dragLine() { return document.querySelector(".quiz .answerline"); }
+function dropIndex(x, y) {
+  const line = dragLine(); if (!line) return { idx: -1 };
+  const lr = line.getBoundingClientRect();
+  if (x < lr.left - 30 || x > lr.right + 30 || y < lr.top - 40 || y > lr.bottom + 40) return { idx: -1 };
+  const tiles = [...line.querySelectorAll(".tile")].filter(t => t !== DRG.src);
+  for (let k = 0; k < tiles.length; k++) {
+    const r = tiles[k].getBoundingClientRect();
+    if (y < r.top) return { idx: k, rect: r, before: true };
+    if (y <= r.bottom && x < r.left + r.width / 2) return { idx: k, rect: r, before: true };
+  }
+  const last = tiles[tiles.length - 1];
+  return { idx: tiles.length, rect: last ? last.getBoundingClientRect() : null, before: false, lr };
+}
+function dragCaret(d) {
+  if (!DRG.caret) { DRG.caret = document.createElement("div"); DRG.caret.className = "drop-caret"; document.body.appendChild(DRG.caret); }
+  if (d.idx < 0) { DRG.caret.style.display = "none"; return; }
+  let x, top, h;
+  if (d.rect) { x = d.before ? d.rect.left - 6 : d.rect.right + 4; top = d.rect.top; h = d.rect.height; }
+  else { x = d.lr ? d.lr.left + 4 : 0; top = d.lr ? d.lr.top + 8 : 0; h = 36; }
+  Object.assign(DRG.caret.style, { display: "block", left: x + "px", top: top + "px", height: h + "px" });
+}
+function dragEnd() {
+  if (DRG.ghost) DRG.ghost.remove(); if (DRG.caret) DRG.caret.remove();
+  if (DRG.src) DRG.src.classList.remove("drag-src");
+  Object.assign(DRG, { on: false, active: false, ghost: null, caret: null, src: null });
+}
+document.addEventListener("pointerdown", e => {
+  if (e.button !== 0 || !S || S.summary || S.answered) return;
+  const t = e.target.closest(".quiz .tile[data-act]"); if (!t || t.classList.contains("used")) return;
+  const q = S.qs[S.i]; if (!q || q.kind !== "order") return;
+  Object.assign(DRG, { on: true, active: false, src: t, x0: e.clientX, y0: e.clientY, from: t.dataset.act === "untile" ? "line" : "pool", id: +(t.dataset.act === "untile" ? t.dataset.pos : t.dataset.i), pid: e.pointerId });
+});
+document.addEventListener("pointermove", e => {
+  if (!DRG.on || e.pointerId !== DRG.pid) return;
+  if (!DRG.active) {
+    if (Math.hypot(e.clientX - DRG.x0, e.clientY - DRG.y0) < 6) return;
+    DRG.active = true;
+    if (typeof hovClear === "function") hovClear();
+    DRG.ghost = DRG.src.cloneNode(true); DRG.ghost.className = "tile tile-ghost"; DRG.ghost.removeAttribute("data-act");
+    document.body.appendChild(DRG.ghost); DRG.src.classList.add("drag-src");
+  }
+  e.preventDefault();
+  Object.assign(DRG.ghost.style, { left: e.clientX + "px", top: e.clientY + "px" });
+  dragCaret(dropIndex(e.clientX, e.clientY));
+}, { passive: false });
+function dragDrop(e) {
+  if (!DRG.on || e.pointerId !== DRG.pid) return;
+  if (!DRG.active) { dragEnd(); return; }
+  const d = dropIndex(e.clientX, e.clientY), from = DRG.from, id = DRG.id;
+  dragEnd();
+  DRG.skipClick = true; setTimeout(() => { DRG.skipClick = false; }, 0);
+  if (!S || S.answered) return;
+  if (from === "line") {
+    const tile = S.placed.splice(id, 1)[0];
+    if (d.idx >= 0) S.placed.splice(d.idx, 0, tile);
+  } else if (d.idx >= 0 && !S.placed.includes(id)) {
+    S.placed.splice(d.idx, 0, id);
+  }
+  render();
+}
+document.addEventListener("pointerup", dragDrop);
+document.addEventListener("pointercancel", e => { if (DRG.on && e.pointerId === DRG.pid) dragEnd(); });
+document.addEventListener("click", e => { if (DRG.skipClick) { e.stopPropagation(); e.preventDefault(); DRG.skipClick = false; } }, true);
 
 /* ===================== BOOT ===================== */
 setSync("local");
